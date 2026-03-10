@@ -287,7 +287,7 @@ jobs:
   android-tests:
     name: Android Tests
     needs: detect-gradle
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.detect-gradle.outputs.has_gradle == 'true'
+    if: needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
