@@ -230,7 +230,7 @@ jobs:
   release:
     name: Release
     needs: detect-gradle
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.detect-gradle.outputs.has_gradle == 'true'
+    if: needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
