@@ -97,29 +97,33 @@ jobs:
             koverVerify \
             --stacktrace
 
-      - name: Merge detekt SARIF
-        if: always()
-        shell: bash
-        run: |
-          mkdir -p build/reports/detekt
-          mapfile -t sarif_files < <(find . -path '*/build/reports/detekt/*.sarif' -type f | sort)
-
-          if [ "${#sarif_files[@]}" -eq 0 ]; then
-            exit 0
-          fi
-
-          jq -s '{
-            version: (.[0].version // "2.1.0"),
-            "$schema": (.[0]."$schema"),
-            runs: (map(.runs // []) | add)
-          }' "${sarif_files[@]}" > build/reports/detekt/detekt-merged.sarif
-
-      - name: Upload detekt SARIF
-        if: always() && hashFiles('build/reports/detekt/detekt-merged.sarif') != ''
+      - name: Upload detekt SARIF for ai
+        if: always() && hashFiles('ai/build/reports/detekt/detekt.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: build/reports/detekt/detekt-merged.sarif
-          category: detekt
+          sarif_file: ai/build/reports/detekt/detekt.sarif
+          category: detekt-ai
+
+      - name: Upload detekt SARIF for app
+        if: always() && hashFiles('app/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: app/build/reports/detekt/detekt.sarif
+          category: detekt-app
+
+      - name: Upload detekt SARIF for data
+        if: always() && hashFiles('data/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: data/build/reports/detekt/detekt.sarif
+          category: detekt-data
+
+      - name: Upload detekt SARIF for domain
+        if: always() && hashFiles('domain/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: domain/build/reports/detekt/detekt.sarif
+          category: detekt-domain
 
       - name: Upload quality artifacts
         if: always()
