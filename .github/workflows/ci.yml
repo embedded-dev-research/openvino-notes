@@ -20,8 +20,31 @@ env:
   JAVA_VERSION: "17"
 
 jobs:
+  detect-gradle:
+    name: Detect Gradle Project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      has_gradle: ${{ steps.detect.outputs.has_gradle }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Gradle files
+        id: detect
+        shell: bash
+        run: |
+          if [ -f gradlew ] || [ -f build.gradle.kts ] || [ -f build.gradle ] || [ -f settings.gradle.kts ] || [ -f settings.gradle ]; then
+            echo "has_gradle=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_gradle=false" >> "$GITHUB_OUTPUT"
+          fi
+
   quality:
     name: Quality
+    needs: detect-gradle
+    if: needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -141,6 +164,8 @@ jobs:
 
   codeql:
     name: CodeQL
+    needs: detect-gradle
+    if: needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -185,7 +210,8 @@ jobs:
 
   release:
     name: Release
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: detect-gradle
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -233,7 +259,8 @@ jobs:
 
   android-tests:
     name: Android Tests
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: detect-gradle
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.detect-gradle.outputs.has_gradle == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
