@@ -44,6 +44,8 @@ jobs:
     uses: ./.github/workflows/quality.yml
     permissions:
       contents: read
+      checks: write
+      pull-requests: write
       security-events: write
 
   codeql:
@@ -78,3 +80,5 @@ jobs:
     uses: ./.github/workflows/android-tests.yml
     permissions:
       contents: read
+      checks: write
+      pull-requests: write
