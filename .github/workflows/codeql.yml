@@ -38,10 +38,13 @@ jobs:
         shell: bash
         run: |
           ./gradlew \
+            clean \
             ai:assembleDebug \
             app:assembleDebug \
             data:assembleDebug \
             domain:assembleDebug \
+            --no-build-cache \
+            --rerun-tasks \
             --stacktrace
 
       - name: Analyze

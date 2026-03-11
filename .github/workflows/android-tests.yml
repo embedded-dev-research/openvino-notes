@@ -49,46 +49,51 @@ jobs:
             build_artifact: debug-apks-x86_64
             emulator_name: x86_64
             runs_on: ubuntu-24.04
-            system_image: system-images;android-34;aosp_atd;x86_64
-            device_name: pixel_7
+            api_level: 34
+            target: default
+            arch: x86_64
+            profile: pixel_7
+            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
             test_suffix: x86-on-x86
           - build_name: x86_64
             build_artifact: debug-apks-x86_64
             emulator_name: arm64
-            runs_on: ubuntu-24.04-arm
-            system_image: system-images;android-34;aosp_atd;arm64-v8a
-            device_name: pixel_7
+            runs_on: macos-15
+            api_level: 34
+            target: default
+            arch: arm64-v8a
+            profile: pixel_7
+            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -camera-back none -camera-front none
             test_suffix: x86-on-arm
           - build_name: arm64
             build_artifact: debug-apks-arm64
             emulator_name: x86_64
             runs_on: ubuntu-24.04
-            system_image: system-images;android-34;aosp_atd;x86_64
-            device_name: pixel_7
+            api_level: 34
+            target: default
+            arch: x86_64
+            profile: pixel_7
+            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
             test_suffix: arm-on-x86
           - build_name: arm64
             build_artifact: debug-apks-arm64
             emulator_name: arm64
-            runs_on: ubuntu-24.04-arm
-            system_image: system-images;android-34;aosp_atd;arm64-v8a
-            device_name: pixel_7
+            runs_on: macos-15
+            api_level: 34
+            target: default
+            arch: arm64-v8a
+            profile: pixel_7
+            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -camera-back none -camera-front none
             test_suffix: arm-on-arm
     runs-on: ${{ matrix.runs_on }}
     timeout-minutes: 45
     permissions:
       contents: read
+      checks: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Set up toolchain
-        uses: ./.github/actions/setup-android-gradle
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          android-api-level: ${{ env.ANDROID_API_LEVEL }}
-          android-build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
-          install-system-image: "true"
-          android-system-image: ${{ matrix.system_image }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
@@ -97,6 +102,7 @@ jobs:
           path: build-artifacts/${{ matrix.build_name }}
 
       - name: Enable KVM when available
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           if [ -e /dev/kvm ]; then
@@ -108,68 +114,56 @@ jobs:
             echo "/dev/kvm is not available on this runner"
           fi
 
-      - name: Start emulator and run instrumentation
+      - name: Run instrumentation on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api_level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          profile: ${{ matrix.profile }}
+          disable-animations: true
+          emulator-options: ${{ matrix.emulator_options }}
+          script: |
+            set -euo pipefail
+
+            APK_DIR="build-artifacts/${{ matrix.build_name }}"
+            APP_APK="$(find "$APK_DIR" -name 'app-debug.apk' | head -n 1)"
+            TEST_APK="$(find "$APK_DIR" -name 'app-debug-androidTest.apk' | head -n 1)"
+
+            if [ -z "$APP_APK" ] || [ -z "$TEST_APK" ]; then
+              echo "Missing APK artifacts in $APK_DIR"
+              exit 1
+            fi
+
+            adb wait-for-device
+            adb shell settings put global window_animation_scale 0 || true
+            adb shell settings put global transition_animation_scale 0 || true
+            adb shell settings put global animator_duration_scale 0 || true
+            adb logcat -c
+            adb install -r "$APP_APK"
+            adb install -r "$TEST_APK"
+            adb shell am instrument -w com.itlab.notes.test/androidx.test.runner.AndroidJUnitRunner | tee instrumentation-raw.txt
+            adb logcat -d > logcat.txt || true
+
+      - name: Convert instrumentation output to JUnit
+        if: always()
         shell: bash
         run: |
-          set -euo pipefail
-
-          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-          AVD_NAME="ci-${{ matrix.test_suffix }}"
-          APK_DIR="build-artifacts/${{ matrix.build_name }}"
-          APP_APK="$(find "$APK_DIR" -name 'app-debug.apk' | head -n 1)"
-          TEST_APK="$(find "$APK_DIR" -name 'app-debug-androidTest.apk' | head -n 1)"
-
-          if [ -z "$APP_APK" ] || [ -z "$TEST_APK" ]; then
-            echo "Missing APK artifacts in $APK_DIR"
-            exit 1
-          fi
-
-          echo "no" | avdmanager create avd --force --name "$AVD_NAME" --package "${{ matrix.system_image }}" --device "${{ matrix.device_name }}"
-
-          EMULATOR_ARGS=(
-            "@$AVD_NAME"
-            -no-window
-            -no-audio
-            -no-snapshot
-            -no-boot-anim
-            -gpu swiftshader_indirect
-            -camera-back none
-            -camera-front none
-          )
-
-          if [ -e /dev/kvm ]; then
-            EMULATOR_ARGS+=(-accel on)
-          else
-            EMULATOR_ARGS+=(-accel off)
-          fi
-
-          emulator "${EMULATOR_ARGS[@]}" > emulator.log 2>&1 &
-          adb wait-for-device
-
-          until adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' | grep -q '^1$'; do
-            sleep 5
-          done
-
-          adb shell settings put global window_animation_scale 0 || true
-          adb shell settings put global transition_animation_scale 0 || true
-          adb shell settings put global animator_duration_scale 0 || true
-          adb logcat -c
-          adb logcat > logcat.txt 2>&1 &
-          LOGCAT_PID=$!
-
-          adb install -r "$APP_APK"
-          adb install -r "$TEST_APK"
-          adb shell am instrument -w -m com.itlab.notes.test/androidx.test.runner.AndroidJUnitRunner | tee instrumentation-raw.txt
-
           python3 - <<'PY'
           import pathlib
           import re
           import xml.etree.ElementTree as ET
 
-          raw = pathlib.Path("instrumentation-raw.txt").read_text()
+          raw_path = pathlib.Path("instrumentation-raw.txt")
+          if not raw_path.exists():
+            raise SystemExit("instrumentation-raw.txt was not generated")
+
+          raw = raw_path.read_text()
           suite = ET.Element("testsuite", name="androidTest", tests="0", failures="0", errors="0", skipped="0")
-          testcase = None
           tests = failures = 0
+          current_class = "unknown"
+          current_test = "unknown"
+          current_stack = ""
 
           for line in raw.splitlines():
             line = line.strip()
@@ -191,13 +185,13 @@ jobs:
                 testcase = ET.SubElement(
                   suite,
                   "testcase",
-                  classname=locals().get("current_class", "unknown"),
-                  name=locals().get("current_test", "unknown"),
+                  classname=current_class,
+                  name=current_test,
                 )
                 if code == -2:
                   failures += 1
                   failure = ET.SubElement(testcase, "failure", message="Instrumentation failure")
-                  failure.text = locals().get("current_stack", "Unknown instrumentation failure")
+                  failure.text = current_stack or "Unknown instrumentation failure"
                   current_stack = ""
 
           suite.set("tests", str(tests))
@@ -207,9 +201,6 @@ jobs:
           tree.write("instrumentation-results.xml", encoding="utf-8", xml_declaration=True)
           pathlib.Path("instrumentation.txt").write_text(raw)
           PY
-
-          adb emu kill || true
-          wait "$LOGCAT_PID" || true
 
       - name: Upload android test artifacts
         if: always()
@@ -222,3 +213,12 @@ jobs:
             instrumentation.txt
             instrumentation-results.xml
             logcat.txt
+
+      - name: Publish instrumentation report
+        if: always()
+        uses: mikepenz/action-junit-report@v6
+        with:
+          check_name: Android Tests (${{ matrix.test_suffix }})
+          report_paths: instrumentation-results.xml
+          require_tests: true
+          fail_on_failure: true
