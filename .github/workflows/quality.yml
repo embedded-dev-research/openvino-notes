@@ -1,0 +1,170 @@
+name: Quality
+
+on:
+  workflow_call:
+
+env:
+  ANDROID_API_LEVEL: "36"
+  ANDROID_BUILD_TOOLS: "36.0.0"
+  JAVA_VERSION: "17"
+
+jobs:
+  quality-foundation:
+    name: Quality Foundation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up toolchain
+        uses: ./.github/actions/setup-android-gradle
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          android-api-level: ${{ env.ANDROID_API_LEVEL }}
+          android-build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
+
+      - name: Format, static analysis, and lint
+        shell: bash
+        run: |
+          ./gradlew \
+            ktlintCheck \
+            detekt \
+            ai:lintDebug \
+            app:lintDebug \
+            data:lintDebug \
+            domain:lintDebug \
+            --stacktrace
+
+      - name: Upload detekt SARIF for ai
+        if: always() && hashFiles('ai/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ai/build/reports/detekt/detekt.sarif
+          category: detekt-ai
+
+      - name: Upload detekt SARIF for app
+        if: always() && hashFiles('app/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: app/build/reports/detekt/detekt.sarif
+          category: detekt-app
+
+      - name: Upload detekt SARIF for data
+        if: always() && hashFiles('data/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: data/build/reports/detekt/detekt.sarif
+          category: detekt-data
+
+      - name: Upload detekt SARIF for domain
+        if: always() && hashFiles('domain/build/reports/detekt/detekt.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: domain/build/reports/detekt/detekt.sarif
+          category: detekt-domain
+
+      - name: Upload foundation artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-foundation-reports
+          if-no-files-found: ignore
+          path: |
+            **/build/reports/detekt/**
+            **/build/reports/ktlint/**
+            **/build/reports/lint-results-*.html
+            **/build/reports/lint-results-*.xml
+
+  build-quality:
+    name: Build Quality (${{ matrix.name }})
+    needs: quality-foundation
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: x86_64
+            runs_on: ubuntu-24.04
+          - name: arm64
+            runs_on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up toolchain
+        uses: ./.github/actions/setup-android-gradle
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          android-api-level: ${{ env.ANDROID_API_LEVEL }}
+          android-build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
+
+      - name: Debug build and unit tests
+        shell: bash
+        run: |
+          ./gradlew \
+            ai:assembleDebug \
+            app:assembleDebug \
+            data:assembleDebug \
+            domain:assembleDebug \
+            ai:testDebugUnitTest \
+            app:testDebugUnitTest \
+            data:testDebugUnitTest \
+            domain:testDebugUnitTest \
+            --stacktrace
+
+      - name: Upload quality artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-build-reports-${{ matrix.name }}
+          if-no-files-found: ignore
+          path: |
+            **/build/reports/tests/**
+            **/build/outputs/unit_test_code_coverage/**
+
+  coverage:
+    name: Coverage
+    needs: quality-foundation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up toolchain
+        uses: ./.github/actions/setup-android-gradle
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          android-api-level: ${{ env.ANDROID_API_LEVEL }}
+          android-build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
+
+      - name: Coverage reports and gate
+        shell: bash
+        run: |
+          ./gradlew \
+            ai:testDebugUnitTest \
+            app:testDebugUnitTest \
+            data:testDebugUnitTest \
+            domain:testDebugUnitTest \
+            koverXmlReport \
+            koverVerify \
+            --stacktrace
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-coverage-reports
+          if-no-files-found: ignore
+          path: |
+            **/build/reports/kover/**

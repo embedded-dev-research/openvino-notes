@@ -1,0 +1,57 @@
+name: Setup Android Gradle
+description: Sets up Java, Android SDK, Gradle, and required SDK packages
+
+inputs:
+  java-version:
+    description: Java version to install
+    required: false
+    default: "17"
+  android-api-level:
+    description: Android API level platform to install
+    required: true
+  android-build-tools:
+    description: Android build tools version to install
+    required: true
+  install-system-image:
+    description: Whether to install an emulator system image
+    required: false
+    default: "false"
+  android-system-image:
+    description: Full sdkmanager system image coordinate
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: ${{ inputs.java-version }}
+        cache: gradle
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v5
+
+    - name: Install Android SDK packages
+      shell: bash
+      run: |
+        set +o pipefail
+        yes | sdkmanager --licenses >/dev/null
+        set -o pipefail
+
+        packages=(
+          "platform-tools"
+          "platforms;android-${{ inputs.android-api-level }}"
+          "build-tools;${{ inputs.android-build-tools }}"
+        )
+
+        if [ "${{ inputs.install-system-image }}" = "true" ] && [ -n "${{ inputs.android-system-image }}" ]; then
+          packages+=("${{ inputs.android-system-image }}")
+        fi
+
+        sdkmanager "${packages[@]}"
