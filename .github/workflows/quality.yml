@@ -121,11 +121,11 @@ jobs:
             **/build/reports/tests/**
             **/build/outputs/unit_test_code_coverage/**
 
-  host-compatibility-arm64:
-    name: Host Compatibility (arm64)
+  build-quality-arm64:
+    name: Build Quality (arm64)
     needs: quality-foundation
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 20
+    runs-on: macos-15
+    timeout-minutes: 35
     permissions:
       contents: read
     steps:
@@ -139,7 +139,7 @@ jobs:
           android-api-level: ${{ env.ANDROID_API_LEVEL }}
           android-build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
 
-      - name: Validate Gradle graph on arm64 host
+      - name: Debug build and unit tests
         shell: bash
         run: |
           ./gradlew \
@@ -151,8 +151,17 @@ jobs:
             app:testDebugUnitTest \
             data:testDebugUnitTest \
             domain:testDebugUnitTest \
-            -m \
             --stacktrace
+
+      - name: Upload quality artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-build-reports-arm64
+          if-no-files-found: ignore
+          path: |
+            **/build/reports/tests/**
+            **/build/outputs/unit_test_code_coverage/**
 
   coverage:
     name: Coverage
