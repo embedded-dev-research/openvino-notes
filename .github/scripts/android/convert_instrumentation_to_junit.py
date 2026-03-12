@@ -1,13 +1,26 @@
 import pathlib
 import re
+import sys
 import xml.etree.ElementTree as ET
 
-raw_path = pathlib.Path("instrumentation-raw.txt")
+
+def arg(index: int, default: str) -> str:
+    try:
+        return sys.argv[index]
+    except IndexError:
+        return default
+
+
+raw_path = pathlib.Path(arg(1, "instrumentation-raw.txt"))
+output_xml = pathlib.Path(arg(2, "instrumentation-results.xml"))
+output_txt = pathlib.Path(arg(3, "instrumentation.txt"))
+suite_name = arg(4, "androidTest")
+
 if not raw_path.exists():
-    raise SystemExit("instrumentation-raw.txt was not generated")
+    raise SystemExit(f"{raw_path} was not generated")
 
 raw = raw_path.read_text()
-suite = ET.Element("testsuite", name="androidTest", tests="0", failures="0", errors="0", skipped="0")
+suite = ET.Element("testsuite", name=suite_name, tests="0", failures="0", errors="0", skipped="0")
 tests = failures = 0
 current_class = "unknown"
 current_test = "unknown"
@@ -46,5 +59,5 @@ suite.set("tests", str(tests))
 suite.set("failures", str(failures))
 tree = ET.ElementTree(suite)
 ET.indent(tree, space="  ")
-tree.write("instrumentation-results.xml", encoding="utf-8", xml_declaration=True)
-pathlib.Path("instrumentation.txt").write_text(raw)
+tree.write(output_xml, encoding="utf-8", xml_declaration=True)
+output_txt.write_text(raw)

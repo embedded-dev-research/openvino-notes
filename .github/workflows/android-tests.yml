@@ -33,53 +33,31 @@ jobs:
         run: bash .github/scripts/android/validate_debug_apk_tasks.sh
 
   android-tests:
-    name: Android Tests (build=${{ matrix.build_name }}, emulator=${{ matrix.emulator_name }})
+    name: Android Tests (${{ matrix.emulator_name }})
     needs: emulator-validation
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 2
       matrix:
         include:
-          - build_name: x86_64
-            build_artifact: debug-apks-x86_64
-            emulator_name: x86_64
+          - emulator_name: x86_64
             runs_on: ubuntu-24.04
             api_level: 34
             target: default
             arch: x86_64
             profile: pixel_7
             emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-            test_suffix: x86-on-x86
-          - build_name: x86_64
-            build_artifact: debug-apks-x86_64
-            emulator_name: arm64
+            test_suffix: x86
+            suite_name: emulator-x86_64
+          - emulator_name: arm64
             runs_on: ubuntu-24.04
             api_level: 34
             target: default
             arch: arm64-v8a
             profile: pixel_7
             emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-            test_suffix: x86-on-arm
-          - build_name: arm64
-            build_artifact: debug-apks-arm64
-            emulator_name: x86_64
-            runs_on: ubuntu-24.04
-            api_level: 34
-            target: default
-            arch: x86_64
-            profile: pixel_7
-            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-            test_suffix: arm-on-x86
-          - build_name: arm64
-            build_artifact: debug-apks-arm64
-            emulator_name: arm64
-            runs_on: ubuntu-24.04
-            api_level: 34
-            target: default
-            arch: arm64-v8a
-            profile: pixel_7
-            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-            test_suffix: arm-on-arm
+            test_suffix: arm64
+            suite_name: emulator-arm64
     runs-on: ${{ matrix.runs_on }}
     timeout-minutes: 45
     permissions:
@@ -91,8 +69,8 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v5
         with:
-          name: ${{ matrix.build_artifact }}
-          path: build-artifacts/${{ matrix.build_name }}
+          pattern: debug-apks-*
+          path: build-artifacts
 
       - name: Enable KVM when available
         if: runner.os == 'Linux'
@@ -109,15 +87,19 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           emulator-options: ${{ matrix.emulator_options }}
-          script: bash .github/scripts/android/run_emulator_instrumentation.sh
+          script: bash .github/scripts/android/run_all_instrumentation_variants.sh
         env:
-          APK_DIR: build-artifacts/${{ matrix.build_name }}
+          APK_ROOT_DIR: build-artifacts
+          RESULTS_ROOT_DIR: android-test-results
           ANDROID_SERIAL: emulator-5554
 
       - name: Convert instrumentation output to JUnit
         if: always()
         shell: bash
-        run: python3 .github/scripts/android/convert_instrumentation_to_junit.py
+        env:
+          RESULTS_ROOT_DIR: android-test-results
+          EMULATOR_SUITE_NAME: ${{ matrix.suite_name }}
+        run: bash .github/scripts/android/convert_instrumentation_tree.sh
 
       - name: Upload android test artifacts
         if: always()
@@ -127,6 +109,4 @@ jobs:
           if-no-files-found: ignore
           path: |
             emulator.log
-            instrumentation.txt
-            instrumentation-results.xml
-            logcat.txt
+            android-test-results/**
