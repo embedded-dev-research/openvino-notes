@@ -93,7 +93,7 @@ If you touch release behavior or Android UI flows, also run:
 - `Build Quality (windows-x86_64)` runs on `windows-2025`
 - `Android Tests` consume APK artifacts from all three build jobs
 - `Android Tests (x86_64)` run on `ubuntu-24.04` with an `x86_64` system image and execute all 3 build variants sequentially inside one emulator session
-- `Android Tests (arm64)` run on `macos-15` with an `arm64-v8a` system image and hardware acceleration explicitly disabled for the hosted Apple Silicon runner
+- `Android Tests (arm64)` is temporarily skipped in hosted CI while the non-self-hosted ARM emulator path remains unstable
 - No CI stage is reserved only for nightly; the same gate set is executed on pull requests
 
 ## Security Rules

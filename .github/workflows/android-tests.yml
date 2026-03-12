@@ -49,15 +49,6 @@ jobs:
             emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
             test_suffix: x86
             suite_name: emulator-x86_64
-          - emulator_name: arm64
-            runs_on: macos-15
-            api_level: 34
-            target: default
-            arch: arm64-v8a
-            profile: pixel_7
-            emulator_options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-            test_suffix: arm64
-            suite_name: emulator-arm64
     runs-on: ${{ matrix.runs_on }}
     timeout-minutes: 45
     permissions:
@@ -76,11 +67,6 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: bash .github/scripts/android/enable_kvm_if_available.sh
-
-      - name: Configure macOS ARM emulator
-        if: runner.os == 'macOS' && matrix.emulator_name == 'arm64'
-        shell: bash
-        run: bash .github/scripts/android/configure_macos_arm_emulator.sh
 
       - name: Run instrumentation on emulator
         uses: reactivecircus/android-emulator-runner@v2
