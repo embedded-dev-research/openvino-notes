@@ -25,6 +25,11 @@ adb_retry() {
   adb "$@"
 }
 
+package_installed() {
+  local package_name="$1"
+  adb shell pm path "$package_name" >/dev/null 2>&1
+}
+
 wait_for_boot_completed() {
   local attempt=1
   while [[ "$attempt" -le 24 ]]; do
@@ -61,10 +66,16 @@ install_and_run() {
     return 1
   fi
 
-  adb_retry uninstall "$test_package" || true
-  adb_retry uninstall "$app_package" || true
-  adb_retry shell pm clear "$app_package" || true
-  adb_retry shell pm clear "$test_package" || true
+  if package_installed "$test_package"; then
+    adb shell pm clear "$test_package" >/dev/null 2>&1 || true
+    adb uninstall "$test_package" >/dev/null 2>&1 || true
+  fi
+
+  if package_installed "$app_package"; then
+    adb shell pm clear "$app_package" >/dev/null 2>&1 || true
+    adb uninstall "$app_package" >/dev/null 2>&1 || true
+  fi
+
   adb_retry logcat -c
   adb_retry install -r "$app_apk"
   adb_retry install -r "$test_apk"
@@ -75,8 +86,14 @@ install_and_run() {
   set -e
 
   adb logcat -d > "$result_dir/logcat.txt" || true
-  adb_retry uninstall "$test_package" || true
-  adb_retry uninstall "$app_package" || true
+
+  if package_installed "$test_package"; then
+    adb uninstall "$test_package" >/dev/null 2>&1 || true
+  fi
+
+  if package_installed "$app_package"; then
+    adb uninstall "$app_package" >/dev/null 2>&1 || true
+  fi
 
   return "$instrumentation_exit_code"
 }
