@@ -1,10 +1,6 @@
-package com.itlab.data
+package com.itlab.data.structure
 
-
-import com.itlab.data.data_structure.ContentItem
-import com.itlab.data.data_structure.ImageSource
-import com.itlab.data.data_structure.Note
-import com.itlab.data.data_structure.TextFormat
+import kotlinx.datetime.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -12,7 +8,6 @@ import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlinx.datetime.Clock
 
 class NoteTest {
     @Test
