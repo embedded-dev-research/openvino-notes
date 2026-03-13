@@ -1,4 +1,4 @@
-package com.itlab.domain.model
+package com.itlab.data.data_structure
 
 import java.util.Date
 import java.util.UUID

@@ -1,6 +1,6 @@
-package com.itlab.domain
+package com.itlab.data
 
-import com.itlab.domain.model.*
+import com.itlab.data.data_structure.*
 import java.util.Date
 import org.junit.Assert.*
 import org.junit.Test
