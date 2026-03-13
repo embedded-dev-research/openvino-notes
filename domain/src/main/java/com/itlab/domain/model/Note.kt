@@ -9,7 +9,7 @@ data class Note(
     val contentItems: List<ContentItem> = emptyList(),
     val createdAt : Date = Date(),
     val updatedAt : Date = Date(),
-    val teg: MutableSet<String> = mutableSetOf(),
+    val tags: Set<String> = emptySet(),
     val isFavorite : Boolean = false
 )
 
@@ -25,16 +25,16 @@ sealed class ContentItem {
     ) : ContentItem()
 
     data class Image(
-       val source: ImageSource,
+        val source: ImageSource,
         val width : Int? = null,
         val height : Int? = null
     ) : ContentItem()
 
     data class File(
-    val uri : String, 
-    val mimeType : String,
-    val name : String,
-    val size : Long? = null
+        val uri : String, 
+        val mimeType : String,
+        val name : String,
+        val size : Long? = null
     ) : ContentItem()
 
     data class Link(
