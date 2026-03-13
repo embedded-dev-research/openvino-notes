@@ -1,4 +1,4 @@
-package com.itlab.data.data_structure
+package com.itlab.data.structure
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant

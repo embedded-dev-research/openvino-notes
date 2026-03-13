@@ -1,10 +1,10 @@
-package com.itlab.data
+package com.itlab.data.structure
 
 
-import com.itlab.data.data_structure.ContentItem
-import com.itlab.data.data_structure.ImageSource
-import com.itlab.data.data_structure.Note
-import com.itlab.data.data_structure.TextFormat
+import com.itlab.data.structure.ContentItem
+import com.itlab.data.structure.ImageSource
+import com.itlab.data.structure.Note
+import com.itlab.data.structure.TextFormat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
