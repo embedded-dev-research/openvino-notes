@@ -9,7 +9,7 @@ data class Note(
     val contentItems: List<ContentItem> = emptyList(),
     val createdAt : Date = Date(),
     val updatedAt : Date = Date(),
-    val teg: MutableSet<String> = mutableSetOf()
+    val teg: MutableSet<String> = mutableSetOf(),
     val isFavorite : Boolean = false
 )
 
