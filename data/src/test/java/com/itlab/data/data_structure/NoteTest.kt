@@ -12,7 +12,7 @@ import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.Date
+import kotlinx.datetime.Clock
 
 class NoteTest {
     @Test
@@ -33,7 +33,7 @@ class NoteTest {
         val id = "custom-id"
         val title = "Test Note"
         val content = listOf(ContentItem.Text("Hello"))
-        val now = Date()
+        val now = Clock.System.now()
         val tags = setOf("work", "important")
 
         val note =

@@ -1,11 +1,11 @@
 package com.itlab.data.data_structure
 
-import kotlinx.datatime.Clock
-import kotlinx.datatime.Instant
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import java.util.UUID
 
 data class NoteFolder(
-    val id : Sting = UUID.randomUUID().toString(),
+    val id : String = UUID.randomUUID().toString(),
     val name : String,
     val notes : List<Note> = emptyList(),
     val createdAt : Instant = Clock.System.now(),

@@ -1,7 +1,7 @@
 package com.itlab.data.data_structure
 
-import kotlinx.datatime.Clock
-import kotlinx.datatime.Instant
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import java.util.UUID
 
 data class Note(
