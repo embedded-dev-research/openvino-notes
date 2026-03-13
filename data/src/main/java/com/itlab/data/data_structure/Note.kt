@@ -1,14 +1,15 @@
 package com.itlab.data.data_structure
 
-import java.util.Date
+import kotlinx.datatime.Clock
+import kotlinx.datatime.Instant
 import java.util.UUID
 
 data class Note(
     val id: String = UUID.randomUUID().toString(),
     val title: String = "",
     val contentItems: List<ContentItem> = emptyList(),
-    val createdAt: Date = Date(),
-    val updatedAt: Date = Date(),
+    val createdAt: Instant = Clock.System.now(),
+    val updatedAt: Instant = Clock.System.now(),
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
 )
