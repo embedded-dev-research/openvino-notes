@@ -15,7 +15,7 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun createsDomainComponents() {
-        val note = Note(id = "1", title = "Title", content = "Body")
+        val note = Note(id = "1", title = "Title")
         val repository: NotesRepository = object : NotesRepository {}
         val useCase = AnalyzeNoteUseCase()
 
