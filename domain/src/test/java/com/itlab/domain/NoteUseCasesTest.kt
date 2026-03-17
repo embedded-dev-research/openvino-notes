@@ -58,13 +58,13 @@ class NoteUseCasesTest {
         override suspend fun renameFolder(
             id: String,
             name: String,
-        ) {}
+        ) = Unit
 
-        override suspend fun deleteFolder(id: String) {}
+        override suspend fun deleteFolder(id: String) = Unit
 
         override suspend fun getFolderById(id: String): NoteFolder? = store[id]
 
-        override suspend fun updateFolder(folder: NoteFolder) {}
+        override suspend fun updateFolder(folder: NoteFolder) = Unit
     }
 
     @Test

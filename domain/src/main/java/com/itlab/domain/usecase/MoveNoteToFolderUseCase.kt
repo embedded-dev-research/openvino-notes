@@ -11,7 +11,6 @@ class MoveNoteToFolderUseCase(
         folderId: String,
         noteId: String,
     ) {
-        val folder = folderRepo.getFolderById(folderId) ?: throw IllegalArgumentException("Folder not found: $folderId")
         val note = notesRepo.getNoteById(noteId) ?: throw IllegalArgumentException("Note not found: $noteId")
         val updated = note.copy(folderId = folderId, updatedAt = Clock.System.now())
         notesRepo.updateNote(updated)
