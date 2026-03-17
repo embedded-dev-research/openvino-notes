@@ -1,11 +1,13 @@
 package com.itlab.domain
 
-import com.itlab.domain.model.*
-import org.junit.Assert.*
+import com.itlab.domain.model.ContentItem
+import com.itlab.domain.model.ImageSource
+import com.itlab.domain.model.Note
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NoteTest {
-
     @Test
     fun note_creation() {
         val note = Note(title = "Hello")
@@ -26,12 +28,13 @@ class NoteTest {
 
     @Test
     fun content_items_types() {
-        val items = listOf(
-            ContentItem.Text("text"),
-            ContentItem.Image(ImageSource.Local("path")),
-            ContentItem.Link("url"),
-            ContentItem.File("uri", "type", "name")
-        )
+        val items =
+            listOf(
+                ContentItem.Text("text"),
+                ContentItem.Image(ImageSource.Local("path")),
+                ContentItem.Link("url"),
+                ContentItem.File("uri", "type", "name"),
+            )
 
         assertTrue(items[0] is ContentItem.Text)
         assertTrue(items[1] is ContentItem.Image)

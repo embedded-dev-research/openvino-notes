@@ -1,11 +1,10 @@
 package com.itlab.domain
 
 import com.itlab.domain.model.NoteFolder
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NoteFolderTest {
-
     @Test
     fun folder_creation() {
         val folder = NoteFolder(id = "1", name = "Test")

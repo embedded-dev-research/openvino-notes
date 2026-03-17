@@ -4,7 +4,6 @@ import com.itlab.domain.model.Note
 import kotlinx.coroutines.flow.Flow
 
 interface NotesRepository {
-
     fun observeNotes(): Flow<List<Note>>
 
     fun observeNotesByFolder(folderId: String): Flow<List<Note>>
