@@ -1,6 +1,12 @@
-package com.itlab.data.entity
+package com.itlab.data.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.itlab.data.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -12,7 +18,7 @@ interface NoteDao {
     suspend fun getNoteByld(noteId: String): NoteEntity?
 
     @Insert
-    suspend fun insert(note : NoteEntity)
+    suspend fun insert(note: NoteEntity)
 
     @Update
     suspend fun update(note: NoteEntity)
