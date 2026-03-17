@@ -1,10 +1,15 @@
-package com.itlab.data.entity
+package com.itlab.data.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.itlab.data.entity.MediaEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MediaDao{
+interface MediaDao {
     @Query("SELECT * FROM media WHERE noteId = :noteId")
     fun getMediaForNote(noteId: String): Flow<List<MediaEntity>>
 
