@@ -6,6 +6,7 @@ import kotlinx.datetime.Clock
 
 class CreateFolderUseCase(private val repo: NoteFolderRepository) {
     suspend operator fun invoke(folder: NoteFolder): String {
+        // discuss
         val folder = folder.copy(createdAt = Clock.System.now())
         return repo.createFolder(folder)
     }
