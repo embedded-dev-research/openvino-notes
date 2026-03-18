@@ -1,9 +1,41 @@
-# Notes (UI prototype)
+[![CI](https://github.com/embedded-dev-research/openvino-notes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/embedded-dev-research/openvino-notes/actions/workflows/ci.yml?query=branch%3Amain)
 
-- The app now starts on the **Directories** screen.
-- Tap a directory to open its **Notes list**, with a **Back** button to return.
-- Directory names and notes are **temporary UI placeholders** until the `data` layer is connected.
-- Colors use **Material 3 dynamic color** (accent comes from the wallpaper on Android 12+).
+# OpenVINO Notes
 
-Build note: if Gradle fails with `JAVA_HOME is not set`, install/configure a JDK and set `JAVA_HOME`.
+OpenVINO notes is an AI-powered notes app for Android. 
 
+The project is written in **Kotlin** and uses **OpenVINO** to run AI features directly on Android devices.
+
+## 🎯 Goal
+Build a lightweight Android notes application with on-device AI for fast, private, and efficient text processing.
+
+## 🚀 Build & Run
+
+### Prerequisites
+* Android Studio (Ladybug+)
+* JDK 17
+* Android SDK 34
+
+### Terminal Instructions
+
+1. Clone the repository:
+git clone https://github.com/IntFxZen/openvino-notes.git
+
+2. Build the project:
+./gradlew assembleDebug
+
+3. Install on device:
+./gradlew installDebug
+
+## 🏗 Architecture & Tech Stack
+
+The project follows **Clean Architecture** principles with a multi-module setup:
+* :app — UI & Dependency Injection
+* :domain — Business Logic & Repository interfaces
+* :data — Repository implementations & Storage
+* :ai — OpenVINO Java API & AI logic
+
+**Core Technologies:**
+* Kotlin
+* Android
+* OpenVINO
