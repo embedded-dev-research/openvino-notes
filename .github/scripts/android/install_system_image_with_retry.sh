@@ -9,6 +9,35 @@ if [[ -z "$sdk_root" ]]; then
   exit 1
 fi
 
+find_sdkmanager() {
+  if command -v sdkmanager >/dev/null 2>&1; then
+    command -v sdkmanager
+    return 0
+  fi
+
+  local candidate
+  for candidate in \
+    "$sdk_root/cmdline-tools/latest/bin/sdkmanager" \
+    "$sdk_root/cmdline-tools/bin/sdkmanager" \
+    "$sdk_root/tools/bin/sdkmanager" \
+    "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" \
+    "/usr/local/lib/android/sdk/cmdline-tools/bin/sdkmanager"
+  do
+    if [[ -x "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+sdkmanager_bin="$(find_sdkmanager || true)"
+if [[ -z "$sdkmanager_bin" ]]; then
+  echo "sdkmanager executable was not found"
+  exit 1
+fi
+
 cleanup_partial_downloads() {
   rm -rf "$HOME/.android/cache"/* || true
   rm -rf "$sdk_root"/.android/cache/* || true
@@ -18,7 +47,7 @@ cleanup_partial_downloads() {
 attempt=1
 while [[ "$attempt" -le 3 ]]; do
   echo "Installing Android system image ($system_image_package), attempt $attempt/3"
-  if sdkmanager --install "$system_image_package" --channel=0; then
+  if "$sdkmanager_bin" --install "$system_image_package" --channel=0; then
     exit 0
   fi
 
