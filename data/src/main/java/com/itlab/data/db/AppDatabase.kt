@@ -9,9 +9,7 @@ import com.itlab.data.entity.NoteEntity
 @Database(
     entities = [NoteEntity::class, MediaEntity::class],
     version = 1,
-    exportShema = false,
+    exportSchema = false,
 )
-@TypeConverters(DataTimeConverters::class)
-abstract class AppDatabase : RoomDatabase(){
-    
-}
+@TypeConverters(DateTimeConverters::class)
+abstract class AppDatabase : RoomDatabase()
