@@ -3,7 +3,7 @@ package com.itlab.data.db
 import androidx.room.TypeConverter
 import kotlinx.datetime.Instant
 
-class DataTimeConverers {
+class DateTimeConverters {
     @TypeConverter
     fun fromTimestamp(value: Long?): Instant? {
         return value?.let {
