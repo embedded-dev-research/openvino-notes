@@ -2,10 +2,12 @@ package com.itlab.data.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "media",
+    indices = [Index(value = ["noteId"])],
     foreignKeys = [
         ForeignKey(
             entity = NoteEntity::class,
