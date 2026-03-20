@@ -2,6 +2,7 @@ package com.itlab.domain.model
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class Note(
@@ -15,37 +16,51 @@ data class Note(
     val isFavorite: Boolean = false,
 )
 
-sealed class ImageSource {
-    data class Local(val path: String) : ImageSource()
+@Serializable
+sealed class DataSource {
+    @Serializable
+    data class Local(
+        val path: String,
+    ) : DataSource()
 
-    data class Remote(val url: String) : ImageSource()
+    @Serializable
+    data class Remote(
+        val url: String,
+    ) : DataSource()
 }
 
+@Serializable
 sealed class ContentItem {
+    @Serializable
     data class Text(
         val text: String,
         val format: TextFormat = TextFormat.PLAIN,
     ) : ContentItem()
 
+    @Serializable
     data class Image(
-        val source: ImageSource,
+        val source: DataSource,
+        val mimeType: String,
         val width: Int? = null,
         val height: Int? = null,
     ) : ContentItem()
 
+    @Serializable
     data class File(
-        val uri: String,
+        val source: DataSource,
         val mimeType: String,
         val name: String,
         val size: Long? = null,
     ) : ContentItem()
 
+    @Serializable
     data class Link(
         val url: String,
         val title: String? = null,
     ) : ContentItem()
 }
 
+@Serializable
 enum class TextFormat {
     PLAIN,
     MARKDOWN,
