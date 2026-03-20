@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.itlab.data.dao.MediaDao
+import com.itlab.data.dao.NoteDao
+import com.itlab.data.db.AppDatabase
 import com.itlab.data.entity.MediaEntity
 import com.itlab.data.entity.NoteEntity
 import kotlinx.coroutines.runBlocking
@@ -16,7 +19,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class NoteAndMediaCascadeTest {
-    private lateinit var db: Appdatabase
+    private lateinit var db: AppDatabase
     private lateinit var noteDao: NoteDao
     private lateinit var mediaDao: MediaDao
 
@@ -24,9 +27,13 @@ class NoteAndMediaCascadeTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
 
-        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+        db =
+            Room.inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                AppDatabase::class.java,
+            ).build()
         noteDao = db.noteDao()
-        mediaDao - db.mediaDao()
+        mediaDao = db.mediaDao()
     }
 
     @After
