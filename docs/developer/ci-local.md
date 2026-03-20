@@ -390,16 +390,6 @@ ANDROID_SERIAL=emulator-5554 APK_DIR=app/build/outputs/apk bash .github/scripts/
 adb -s emulator-5554 emu kill
 ```
 
-Validated result:
-
-```text
-com.itlab.notes.ExampleInstrumentedTest:.
-
-Time: 0.006
-
-OK (1 test)
-```
-
 CI-like artifact layout:
 
 ```bash
