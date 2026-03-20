@@ -42,9 +42,9 @@ The project follows **Clean Architecture** principles with a multi-module setup:
 
 ## 📚 Documentation
 
-Project documentation now lives in [`docs/`](./docs/README.md) as a small tree:
+Project documentation now lives in [`docs/`](./docs/README.md):
 
 * [`docs/README.md`](./docs/README.md) - documentation index
 * [`docs/developer/README.md`](./docs/developer/README.md) - contributor entry point
-* [`docs/developer/project-tree.md`](./docs/developer/project-tree.md) - repository structure and CI layout
+* [`docs/developer/project.md`](./docs/developer/project.md) - project overview
 * [`docs/developer/ci-local.md`](./docs/developer/ci-local.md) - how to reproduce CI checks locally on Linux, macOS, and Windows

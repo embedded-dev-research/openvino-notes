@@ -140,7 +140,7 @@ bash .github/scripts/quality/run_coverage.sh
 
 ### Foundation
 
-Source of truth: [run_foundation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_foundation.sh)
+CI script: [run_foundation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_foundation.sh)
 
 Tasks:
 
@@ -176,7 +176,7 @@ Linux arm64 note:
 
 ### Debug Build and Host Unit Tests
 
-Sources of truth:
+CI scripts:
 
 - [run_debug_build_and_unit_tests.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests.sh)
 - [run_debug_build_and_unit_tests_windows.ps1](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests_windows.ps1)
@@ -215,7 +215,7 @@ Outputs:
 
 ### Coverage
 
-Source of truth: [run_coverage.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_coverage.sh)
+CI script: [run_coverage.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_coverage.sh)
 
 Tasks:
 
@@ -244,7 +244,7 @@ Output:
 
 ### Release
 
-Sources of truth:
+CI scripts:
 
 - [assemble_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/assemble_release.sh)
 - [lint_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/lint_release.sh)
@@ -265,7 +265,7 @@ Windows:
 
 ### Secrets
 
-Source of truth: [run_gitleaks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/security/run_gitleaks.sh)
+CI script: [run_gitleaks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/security/run_gitleaks.sh)
 
 Linux x86_64:
 
@@ -285,7 +285,7 @@ Linux arm64 note:
 
 ### Preflight
 
-Source of truth: [classify_changes.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/preflight/classify_changes.sh)
+CI script: [classify_changes.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/preflight/classify_changes.sh)
 
 The script expects `GITHUB_OUTPUT`, so a plain local invocation is not enough.
 
@@ -306,7 +306,7 @@ rm -f "$tmpfile"
 
 ### CodeQL Build
 
-Source of truth: [build_for_codeql.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/codeql/build_for_codeql.sh)
+CI script: [build_for_codeql.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/codeql/build_for_codeql.sh)
 
 Linux or macOS:
 
@@ -327,7 +327,7 @@ Limitation:
 
 ### Android Instrumentation
 
-Sources of truth:
+CI scripts:
 
 - [validate_debug_apk_tasks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/validate_debug_apk_tasks.sh)
 - [run_emulator_instrumentation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/run_emulator_instrumentation.sh)
@@ -390,12 +390,25 @@ ANDROID_SERIAL=emulator-5554 APK_DIR=app/build/outputs/apk bash .github/scripts/
 adb -s emulator-5554 emu kill
 ```
 
-CI-like artifact layout:
+Validated result:
 
-```bash
-mkdir -p build-artifacts/local
-cp app/build/outputs/apk/debug/app-debug.apk build-artifacts/local/
-cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk build-artifacts/local/
-APK_ROOT_DIR=build-artifacts RESULTS_ROOT_DIR=android-test-results bash .github/scripts/android/run_all_instrumentation_variants.sh
+```text
+com.itlab.notes.ExampleInstrumentedTest:.
+
+Time: 0.006
+
+OK (1 test)
 ```
 
+## Not Fully Reproducible Locally
+
+- dependency review
+- workflow summaries
+- artifact upload
+- full CodeQL action lifecycle
+
+## Practical Rule
+
+For pre-push debugging, reproducing the Gradle tasks and repository scripts above is usually enough.
+
+On Windows, use Git Bash or WSL for the bash-based Android helper scripts. The Gradle commands themselves are platform-specific, but the repository's emulator helper scripts are shell scripts, not PowerShell scripts.

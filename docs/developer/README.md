@@ -6,8 +6,8 @@ The repository already has a meaningful CI and build setup, while the applicatio
 
 ## Recommended Reading Order
 
-1. [Project Structure](./project-tree.md)
-2. [Local CI Reproduction](./ci-local.md)
+1. [Local CI Reproduction](./ci-local.md)
+2. [Project Overview](./project.md)
 
 ## Current State
 
