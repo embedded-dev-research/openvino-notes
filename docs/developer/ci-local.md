@@ -416,8 +416,3 @@ APK_ROOT_DIR=build-artifacts RESULTS_ROOT_DIR=android-test-results bash .github/
 - artifact upload
 - full CodeQL action lifecycle
 
-## Practical Rule
-
-For pre-push debugging, reproducing the Gradle tasks and repository scripts above is usually enough.
-
-On Windows, use Git Bash or WSL for the bash-based Android helper scripts. The Gradle commands themselves are platform-specific, but the repository's emulator helper scripts are shell scripts, not PowerShell scripts.
