@@ -2,24 +2,6 @@
 
 `openvino-notes` is an Android multi-module project. The product direction is an AI-assisted notes app powered by OpenVINO, but the current repository is still in an early implementation stage.
 
-## Repository Layout
-
-```text
-openvino-notes/
-├── .github/
-├── ai/
-├── app/
-├── data/
-├── docs/
-├── domain/
-├── gradle/
-├── build.gradle.kts
-├── detekt.yml
-├── gradle.properties
-├── lint.xml
-├── settings.gradle.kts
-└── README.md
-```
 
 ## Modules
 
