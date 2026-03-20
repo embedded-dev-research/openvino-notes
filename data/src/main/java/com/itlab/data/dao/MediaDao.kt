@@ -11,7 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MediaDao {
     @Query("SELECT * FROM media WHERE noteId = :noteId")
-    fun getMediaForNote(noteId: String): Flow<List<MediaEntity>>
+    fun getMediaForNoteFlow(noteId: String): Flow<List<MediaEntity>>
+
+    @Query("SELECT * FROM media WHERE noteId = :noteId")
+    fun getMediaForNote(noteId: String): List<MediaEntity>
 
     @Insert
     suspend fun insert(media: MediaEntity)
