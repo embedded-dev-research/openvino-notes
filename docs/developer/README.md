@@ -1,42 +1,30 @@
-# Developer Docs
+# Developer Guide
 
-```text
-developer/
-|-- README.md
-|-- project-tree.md
-`-- ci-local.md
-```
+This documentation is intended for contributors working on `openvino-notes`.
 
-```text
-read-order
-|-- 1
-|   `-- [project-tree.md](./project-tree.md)
-|       `-- understand repository boundaries
-`-- 2
-    `-- [ci-local.md](./ci-local.md)
-        `-- reproduce the checks that gate pull requests and main
-```
+The repository already has a meaningful CI and build setup, while the application code is still at an early implementation stage. The goal of these documents is to help contributors understand the project quickly and reproduce the same checks that gate pull requests and `main`.
 
-```text
-engineering-state
-|-- build-and-ci
-|   |-- mature enough to enforce quality gates
-|   `-- broad enough to cover lint, tests, release, security, and emulator runs
-`-- product-code
-    |-- still scaffolded in many places
-    |-- safe to treat as early-stage implementation
-    `-- should not be documented as feature-complete
-```
+## Recommended Reading Order
 
-```text
-where-you-will-work
-|-- application-code
-|   |-- app/
-|   |-- domain/
-|   |-- data/
-|   `-- ai/
-`-- automation
-    `-- .github/
-```
+1. [Project Structure](./project-tree.md)
+2. [Local CI Reproduction](./ci-local.md)
 
-This documentation is written for contributors who need to understand the repository quickly and run the same checks that GitHub Actions runs. The codebase is already strict about build quality, but much of the product logic is still scaffolded, so the docs intentionally describe the current state rather than an ideal future state.
+## Current State
+
+What is already in place:
+
+- a four-module Android build
+- reusable GitHub Actions workflows
+- shared formatting, lint, and coverage policy
+
+What is still mostly scaffolded:
+
+- domain contracts
+- data-layer behavior
+- OpenVINO integration
+- app-level product flows
+
+## Main Work Areas
+
+- Application code: `app`, `domain`, `data`, `ai`
+- Automation and CI: `.github`

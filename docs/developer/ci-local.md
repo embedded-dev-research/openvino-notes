@@ -1,105 +1,67 @@
 # Local CI Reproduction
 
-```text
-local-ci-flow
-|-- setup toolchain
-|-- run foundation
-|-- run debug build and host unit tests
-|-- run coverage
-|-- optionally run
-|   |-- release
-|   |-- secrets
-|   |-- preflight
-|   `-- codeql-build
-`-- optionally run
-    `-- android-instrumentation
-```
+This guide explains how to reproduce repository checks locally on Linux, macOS, and Windows.
 
-```text
-toolchain
-|-- Java
-|   `-- JDK 17
-|-- Android SDK
-|   |-- command-line tools
-|   |-- platform-tools
-|   |-- platforms;android-36
-|   `-- build-tools;36.0.0
-`-- Git
-```
+## Toolchain Baseline
 
-```text
-verification-note
-`-- current host
-    `-- macOS arm64
-        `-- JDK 17 was configured from Homebrew openjdk@17
-        `-- quality, release, CodeQL build, preflight, APK task validation, gitleaks, and emulator instrumentation were reproduced locally
-```
+- JDK 17
+- Android SDK command-line tools
+- Android platform-tools
+- Android platform `android-36`
+- Android build-tools `36.0.0`
+- Git
 
-```text
-linux-arm64-findings
-|-- host
-|   `-- Ubuntu 24.04 arm64
-|-- reproduced
-|   |-- JDK 17 setup
-|   |-- Android SDK command-line tools setup
-|   |-- sdkmanager package install
-|   |-- preflight
-|   `-- security helper failure mode
-`-- differences
-    |-- if local.properties points to another OS path, Gradle prefers it over ANDROID_SDK_ROOT
-    |-- .github/scripts/security/run_gitleaks.sh downloads a linux_x64 binary and fails on arm64
-    `-- Android lint/build path hit Aapt2InternalException: Failed to start AAPT2 process
-```
+## Validation Status
 
-This guide is written to be executable on Linux, macOS, and Windows. Where the repository already has OS-specific scripts, those scripts are used directly. Where the repository only has a Linux helper, the equivalent native command is shown for the other operating systems.
+### macOS arm64
 
-```text
-macos-validated-path
-|-- host
-|   `-- macOS arm64
-|-- Java
-|   `-- Homebrew openjdk@17
-|-- Android SDK root
-|   `-- ~/Library/Android/sdk
-`-- emulator
-    `-- android-34 google_apis arm64-v8a AVD
-```
+Validated locally:
 
-## Setup
+- foundation checks
+- debug build and unit tests
+- coverage
+- release assemble
+- release lint
+- CodeQL build
+- preflight
+- APK task validation
+- gitleaks
+- emulator instrumentation
 
-```text
-linux-macos
-|-- optional Java
-|   |-- export JAVA_HOME="$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home"
-|   `-- export PATH="$JAVA_HOME/bin:$PATH"
-|-- export ANDROID_API_LEVEL=36
-|-- export ANDROID_BUILD_TOOLS=36.0.0
-|-- export INSTALL_SYSTEM_IMAGE=false
-|-- export ANDROID_SYSTEM_IMAGE=
-`-- bash .github/scripts/setup/install_android_sdk_packages.sh
-```
+Environment used:
 
-```text
-windows-powershell
-|-- $env:ANDROID_API_LEVEL = "36"
-|-- $env:ANDROID_BUILD_TOOLS = "36.0.0"
-|-- $env:INSTALL_SYSTEM_IMAGE = "false"
-|-- $env:ANDROID_SYSTEM_IMAGE = ""
-`-- .\.github\scripts\setup\install_android_sdk_packages_windows.ps1
-```
+- Homebrew `openjdk@17`
+- Android SDK root: `~/Library/Android/sdk`
+- emulator target: `android-34`, `google_apis`, `arm64-v8a`
 
-```text
-emulator-note
-`-- if local instrumentation is needed
-    |-- set INSTALL_SYSTEM_IMAGE=true
-    `-- provide a system image matching the host architecture
-```
+### Linux arm64
 
-Linux or macOS:
+Validated locally on Ubuntu 24.04 arm64:
+
+- JDK 17 setup
+- Android SDK command-line tools setup
+- `sdkmanager` package install
+- preflight
+
+Observed differences:
+
+- if `local.properties` points to an SDK path from another OS, Gradle prefers it over `ANDROID_SDK_ROOT`
+- `.github/scripts/security/run_gitleaks.sh` fails on arm64 because it downloads a `linux_x64` binary
+- Android lint/build path failed with `Aapt2InternalException: Failed to start AAPT2 process`
+
+### Linux x86_64
+
+This is the closest path to GitHub CI and should be treated as the reference Linux environment for full parity.
+
+## Environment Setup
+
+### macOS
 
 ```bash
 export JAVA_HOME="$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
+export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
 export ANDROID_API_LEVEL=36
 export ANDROID_BUILD_TOOLS=36.0.0
 export INSTALL_SYSTEM_IMAGE=false
@@ -108,7 +70,24 @@ export ANDROID_SYSTEM_IMAGE=
 bash .github/scripts/setup/install_android_sdk_packages.sh
 ```
 
-Windows PowerShell:
+### Linux
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH="$JAVA_HOME/bin:$PATH"
+export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
+export ANDROID_API_LEVEL=36
+export ANDROID_BUILD_TOOLS=36.0.0
+export INSTALL_SYSTEM_IMAGE=false
+export ANDROID_SYSTEM_IMAGE=
+
+bash .github/scripts/setup/install_android_sdk_packages.sh
+```
+
+If your Linux host is `arm64`, native SDK installation can still work, but Android Gradle tasks may differ from `x86_64` CI behavior.
+
+### Windows PowerShell
 
 ```powershell
 $env:ANDROID_API_LEVEL = "36"
@@ -119,42 +98,29 @@ $env:ANDROID_SYSTEM_IMAGE = ""
 .\.github\scripts\setup\install_android_sdk_packages_windows.ps1
 ```
 
-macOS note:
+## Cross-OS SDK Path Note
 
-```bash
-export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
-export ANDROID_HOME="$ANDROID_SDK_ROOT"
-```
+If the working tree was copied from another machine or another OS, check `local.properties`.
 
-Linux note when the working tree was copied from another host:
+If it contains a stale `sdk.dir`, Gradle uses that value before `ANDROID_SDK_ROOT`.
+
+Fix it with:
 
 ```bash
 printf 'sdk.dir=%s\n' "$HOME/Android/Sdk" > local.properties
 ```
 
-If `local.properties` contains a path from another OS, Gradle prefers that `sdk.dir` over `ANDROID_SDK_ROOT` and Android tasks fail before the real build starts.
+On macOS:
 
-## Main Developer Gate
-
-```text
-main-local-gate
-|-- foundation
-|   `-- bash .github/scripts/quality/run_foundation.sh
-|-- debug-build-and-unit-tests
-|   `-- bash .github/scripts/quality/run_debug_build_and_unit_tests.sh
-`-- coverage
-    `-- bash .github/scripts/quality/run_coverage.sh
+```bash
+printf 'sdk.dir=%s\n' "$HOME/Library/Android/sdk" > local.properties
 ```
 
-```text
-windows-main-local-gate
-|-- debug-build-and-unit-tests
-|   `-- .\.github\scripts\quality\run_debug_build_and_unit_tests_windows.ps1
-`-- foundation-and-coverage
-    `-- .\gradlew.bat ktlintCheck detekt ai:lintDebug app:lintDebug data:lintDebug domain:lintDebug ai:testDebugUnitTest app:testDebugUnitTest data:testDebugUnitTest domain:testDebugUnitTest koverXmlReport koverVerify --stacktrace
-```
+## Main Local Gate
 
-Linux or macOS:
+Use this as the default pre-push validation path.
+
+### Linux or macOS
 
 ```bash
 bash .github/scripts/quality/run_foundation.sh
@@ -162,18 +128,7 @@ bash .github/scripts/quality/run_debug_build_and_unit_tests.sh
 bash .github/scripts/quality/run_coverage.sh
 ```
 
-Linux architecture note:
-
-```text
-linux
-|-- x86_64
-|   `-- closest path to GitHub CI
-`-- arm64
-    |-- SDK setup and preflight were reproduced
-    `-- Android Gradle tasks were not validated because AAPT2 failed to start on Ubuntu 24.04 arm64
-```
-
-Windows PowerShell:
+### Windows PowerShell
 
 ```powershell
 .\.github\scripts\quality\run_debug_build_and_unit_tests_windows.ps1
@@ -183,134 +138,156 @@ Windows PowerShell:
 
 ## Checks
 
-```text
-foundation
-|-- source-of-truth
-|   `-- [run_foundation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_foundation.sh)
-|-- tasks
-|   |-- ktlintCheck
-|   |-- detekt
-|   |-- ai:lintDebug
-|   |-- app:lintDebug
-|   |-- data:lintDebug
-|   `-- domain:lintDebug
-|-- linux-macos
-|   `-- bash .github/scripts/quality/run_foundation.sh
-|-- windows
-|   `-- .\gradlew.bat ktlintCheck detekt ai:lintDebug app:lintDebug data:lintDebug domain:lintDebug --stacktrace
-`-- outputs
-    |-- **/build/reports/detekt/
-    |-- **/build/reports/ktlint/
-    |-- **/build/reports/lint-results-*.html
-    `-- **/build/reports/lint-results-*.xml
+### Foundation
+
+Source of truth: [run_foundation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_foundation.sh)
+
+Tasks:
+
+- `ktlintCheck`
+- `detekt`
+- `ai:lintDebug`
+- `app:lintDebug`
+- `data:lintDebug`
+- `domain:lintDebug`
+
+Linux or macOS:
+
+```bash
+bash .github/scripts/quality/run_foundation.sh
+```
+
+Windows:
+
+```powershell
+.\gradlew.bat ktlintCheck detekt ai:lintDebug app:lintDebug data:lintDebug domain:lintDebug --stacktrace
+```
+
+Outputs:
+
+- `**/build/reports/detekt/`
+- `**/build/reports/ktlint/`
+- `**/build/reports/lint-results-*.html`
+- `**/build/reports/lint-results-*.xml`
+
+Linux arm64 note:
+
+- on Ubuntu 24.04 arm64, the Android lint/build path failed with `Aapt2InternalException: Failed to start AAPT2 process`
+
+### Debug Build and Host Unit Tests
+
+Sources of truth:
+
+- [run_debug_build_and_unit_tests.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests.sh)
+- [run_debug_build_and_unit_tests_windows.ps1](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests_windows.ps1)
+
+Tasks:
+
+- `ai:assembleDebug`
+- `app:assembleDebug`
+- `app:assembleDebugAndroidTest`
+- `data:assembleDebug`
+- `domain:assembleDebug`
+- `ai:testDebugUnitTest`
+- `app:testDebugUnitTest`
+- `data:testDebugUnitTest`
+- `domain:testDebugUnitTest`
+
+Linux or macOS:
+
+```bash
+bash .github/scripts/quality/run_debug_build_and_unit_tests.sh
+```
+
+Windows:
+
+```powershell
+.\.github\scripts\quality\run_debug_build_and_unit_tests_windows.ps1
+```
+
+Outputs:
+
+- `app/build/outputs/apk/debug/app-debug.apk`
+- `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk`
+- `**/build/test-results/`
+- `**/build/reports/tests/`
+- `**/build/outputs/unit_test_code_coverage/`
+
+### Coverage
+
+Source of truth: [run_coverage.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_coverage.sh)
+
+Tasks:
+
+- `ai:testDebugUnitTest`
+- `app:testDebugUnitTest`
+- `data:testDebugUnitTest`
+- `domain:testDebugUnitTest`
+- `koverXmlReport`
+- `koverVerify`
+
+Linux or macOS:
+
+```bash
+bash .github/scripts/quality/run_coverage.sh
+```
+
+Windows:
+
+```powershell
+.\gradlew.bat ai:testDebugUnitTest app:testDebugUnitTest data:testDebugUnitTest domain:testDebugUnitTest koverXmlReport koverVerify --stacktrace
+```
+
+Output:
+
+- `**/build/reports/kover/`
+
+### Release
+
+Sources of truth:
+
+- [assemble_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/assemble_release.sh)
+- [lint_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/lint_release.sh)
+
+Linux or macOS:
+
+```bash
+bash .github/scripts/release/assemble_release.sh
+bash .github/scripts/release/lint_release.sh
+```
+
+Windows:
+
+```powershell
+.\gradlew.bat ai:assembleRelease app:assembleRelease data:assembleRelease domain:assembleRelease --stacktrace
+.\gradlew.bat ai:lintRelease app:lintRelease data:lintRelease domain:lintRelease --stacktrace
+```
+
+### Secrets
+
+Source of truth: [run_gitleaks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/security/run_gitleaks.sh)
+
+Linux x86_64:
+
+```bash
+bash .github/scripts/security/run_gitleaks.sh
+```
+
+Native `gitleaks` path for Linux arm64, macOS, and Windows:
+
+```bash
+gitleaks detect --source . --report-format sarif --report-path build/reports/gitleaks/gitleaks.sarif --redact
 ```
 
 Linux arm64 note:
 
-```text
-Ubuntu 24.04 arm64
-`-- app lint path failed with
-    `-- Aapt2InternalException: Failed to start AAPT2 process
-```
+- `.github/scripts/security/run_gitleaks.sh` failed with `cannot execute binary file: Exec format error`
 
-```text
-debug-build-and-unit-tests
-|-- source-of-truth
-|   |-- [run_debug_build_and_unit_tests.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests.sh)
-|   `-- [run_debug_build_and_unit_tests_windows.ps1](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_debug_build_and_unit_tests_windows.ps1)
-|-- tasks
-|   |-- ai:assembleDebug
-|   |-- app:assembleDebug
-|   |-- app:assembleDebugAndroidTest
-|   |-- data:assembleDebug
-|   |-- domain:assembleDebug
-|   |-- ai:testDebugUnitTest
-|   |-- app:testDebugUnitTest
-|   |-- data:testDebugUnitTest
-|   `-- domain:testDebugUnitTest
-|-- linux-macos
-|   `-- bash .github/scripts/quality/run_debug_build_and_unit_tests.sh
-|-- windows
-|   `-- .\.github\scripts\quality\run_debug_build_and_unit_tests_windows.ps1
-`-- outputs
-    |-- app/build/outputs/apk/debug/app-debug.apk
-    |-- app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-    |-- **/build/test-results/
-    |-- **/build/reports/tests/
-    `-- **/build/outputs/unit_test_code_coverage/
-```
+### Preflight
 
-```text
-coverage
-|-- source-of-truth
-|   `-- [run_coverage.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/quality/run_coverage.sh)
-|-- tasks
-|   |-- ai:testDebugUnitTest
-|   |-- app:testDebugUnitTest
-|   |-- data:testDebugUnitTest
-|   |-- domain:testDebugUnitTest
-|   |-- koverXmlReport
-|   `-- koverVerify
-|-- linux-macos
-|   `-- bash .github/scripts/quality/run_coverage.sh
-|-- windows
-|   `-- .\gradlew.bat ai:testDebugUnitTest app:testDebugUnitTest data:testDebugUnitTest domain:testDebugUnitTest koverXmlReport koverVerify --stacktrace
-`-- outputs
-    `-- **/build/reports/kover/
-```
+Source of truth: [classify_changes.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/preflight/classify_changes.sh)
 
-```text
-release
-|-- source-of-truth
-|   |-- [assemble_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/assemble_release.sh)
-|   `-- [lint_release.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/release/lint_release.sh)
-|-- linux-macos
-|   |-- bash .github/scripts/release/assemble_release.sh
-|   `-- bash .github/scripts/release/lint_release.sh
-`-- windows
-    |-- .\gradlew.bat ai:assembleRelease app:assembleRelease data:assembleRelease domain:assembleRelease --stacktrace
-    `-- .\gradlew.bat ai:lintRelease app:lintRelease data:lintRelease domain:lintRelease --stacktrace
-```
-
-```text
-secrets
-|-- source-of-truth
-|   `-- [run_gitleaks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/security/run_gitleaks.sh)
-|-- linux-x86_64
-|   `-- bash .github/scripts/security/run_gitleaks.sh
-`-- native-gitleaks
-    |-- linux-arm64
-    |-- macOS
-    |-- Windows
-    `-- run
-        `-- gitleaks detect --source . --report-format sarif --report-path build/reports/gitleaks/gitleaks.sarif --redact
-```
-
-Linux arm64 note:
-
-```text
-Ubuntu 24.04 arm64
-`-- .github/scripts/security/run_gitleaks.sh failed with
-    `-- cannot execute binary file: Exec format error
-```
-
-```text
-preflight
-|-- source-of-truth
-|   `-- [classify_changes.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/preflight/classify_changes.sh)
-|-- local-bash-example
-|   `-- tmpfile=$(mktemp) && \
-|       GITHUB_OUTPUT="$tmpfile" \
-|       EVENT_NAME=pull_request \
-|       BASE_SHA="$(git merge-base upstream/main HEAD)" \
-|       HEAD_SHA="$(git rev-parse HEAD)" \
-|       BEFORE_SHA="" \
-|       CURRENT_SHA="$(git rev-parse HEAD)" \
-|       bash .github/scripts/preflight/classify_changes.sh && \
-|       cat "$tmpfile" && rm -f "$tmpfile"
-`-- powershell
-    `-- create a temp output file, set the same environment variables, and invoke bash
-```
+The script expects `GITHUB_OUTPUT`, so a plain local invocation is not enough.
 
 Example:
 
@@ -327,75 +304,69 @@ cat "$tmpfile"
 rm -f "$tmpfile"
 ```
 
-```text
-codeql-build
-|-- source-of-truth
-|   `-- [build_for_codeql.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/codeql/build_for_codeql.sh)
-|-- linux-macos
-|   `-- bash .github/scripts/codeql/build_for_codeql.sh
-|-- windows
-|   `-- .\gradlew.bat clean ai:assembleDebug app:assembleDebug data:assembleDebug domain:assembleDebug --no-build-cache --rerun-tasks --stacktrace
-`-- limitation
-    |-- reproduces build input
-    `-- full local parity still needs CodeQL CLI setup
+### CodeQL Build
+
+Source of truth: [build_for_codeql.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/codeql/build_for_codeql.sh)
+
+Linux or macOS:
+
+```bash
+bash .github/scripts/codeql/build_for_codeql.sh
 ```
 
-```text
-android-instrumentation
-|-- source-of-truth
-|   |-- [validate_debug_apk_tasks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/validate_debug_apk_tasks.sh)
-|   |-- [run_emulator_instrumentation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/run_emulator_instrumentation.sh)
-|   `-- [run_all_instrumentation_variants.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/run_all_instrumentation_variants.sh)
-|-- current-ci-target
-|   `-- linux
-|       `-- api 34
-|           `-- x86_64
-|               `-- pixel_7
-|-- linux-arm64
-|   `-- status
-|       `-- not validated
-|           `-- upstream Android build path already failed at AAPT2 startup
-|-- macos-validated-target
-|   `-- local
-|       `-- api 34
-|           `-- arm64-v8a
-|               `-- pixel_7
-|-- validate-apk-tasks
-|   |-- linux-macos
-|   |   `-- bash .github/scripts/android/validate_debug_apk_tasks.sh
-|   `-- windows
-|       `-- .\gradlew.bat app:assembleDebug app:assembleDebugAndroidTest -m --stacktrace
-|-- manual-emulator-flow
-|   |-- build
-|   |   `-- ./gradlew app:assembleDebug app:assembleDebugAndroidTest --stacktrace
-|   |-- boot
-|   |   `-- start emulator and wait for full boot
-|   `-- run-helper
-|       `-- APK_DIR=app/build/outputs/apk bash .github/scripts/android/run_emulator_instrumentation.sh
-|-- ci-like-artifact-layout
-|   |-- mkdir -p build-artifacts/local
-|   |-- cp app/build/outputs/apk/debug/app-debug.apk build-artifacts/local/
-|   |-- cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk build-artifacts/local/
-|   `-- APK_ROOT_DIR=build-artifacts RESULTS_ROOT_DIR=android-test-results bash .github/scripts/android/run_all_instrumentation_variants.sh
-`-- notes
-    |-- CI uses script-driven emulator execution
-    |-- app module defines x86_64 and arm64-v8a managed devices
-    |-- workflow currently runs only the Linux x86_64 path
-    |-- macOS was validated with an arm64 emulator, not the Linux x86_64 CI image
-    `-- run_emulator_instrumentation.sh expects a booted device and installs APKs itself
+Windows:
+
+```powershell
+.\gradlew.bat clean ai:assembleDebug app:assembleDebug data:assembleDebug domain:assembleDebug --no-build-cache --rerun-tasks --stacktrace
 ```
+
+Limitation:
+
+- this reproduces the build input
+- full local parity still requires local CodeQL CLI setup
+
+### Android Instrumentation
+
+Sources of truth:
+
+- [validate_debug_apk_tasks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/validate_debug_apk_tasks.sh)
+- [run_emulator_instrumentation.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/run_emulator_instrumentation.sh)
+- [run_all_instrumentation_variants.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/android/run_all_instrumentation_variants.sh)
+
+GitHub CI target:
+
+- Linux
+- API 34
+- `x86_64`
+- `pixel_7`
+
+Validated local macOS target:
+
+- macOS arm64
+- API 34
+- `arm64-v8a`
+- `pixel_7`
+
+Linux arm64 status:
+
+- not validated end-to-end
+- upstream Android build path already failed at AAPT2 startup
 
 Task validation:
+
+Linux or macOS:
 
 ```bash
 bash .github/scripts/android/validate_debug_apk_tasks.sh
 ```
 
+Windows:
+
 ```powershell
 .\gradlew.bat app:assembleDebug app:assembleDebugAndroidTest -m --stacktrace
 ```
 
-Manual emulator reproduction on any OS with a booted emulator:
+Basic manual flow:
 
 ```bash
 ./gradlew app:assembleDebug app:assembleDebugAndroidTest --stacktrace
@@ -419,7 +390,7 @@ ANDROID_SERIAL=emulator-5554 APK_DIR=app/build/outputs/apk bash .github/scripts/
 adb -s emulator-5554 emu kill
 ```
 
-Validated result on macOS arm64:
+Validated result:
 
 ```text
 com.itlab.notes.ExampleInstrumentedTest:.
@@ -438,18 +409,15 @@ cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk build-artif
 APK_ROOT_DIR=build-artifacts RESULTS_ROOT_DIR=android-test-results bash .github/scripts/android/run_all_instrumentation_variants.sh
 ```
 
-```text
-not-fully-reproducible
-|-- dependency review
-|-- workflow summaries
-|-- artifact upload
-`-- full CodeQL action lifecycle
-```
+## Not Fully Reproducible Locally
 
-```text
-developer-practical-rule
-`-- for pre-push debugging
-    `-- reproducing the Gradle tasks and repository scripts above is usually enough
-```
+- dependency review
+- workflow summaries
+- artifact upload
+- full CodeQL action lifecycle
 
-Use Git Bash or WSL on Windows for the bash-based Android helper scripts. The Gradle commands themselves are platform-specific above, but the repository's emulator helper scripts are shell scripts, not PowerShell scripts.
+## Practical Rule
+
+For pre-push debugging, reproducing the Gradle tasks and repository scripts above is usually enough.
+
+On Windows, use Git Bash or WSL for the bash-based Android helper scripts. The Gradle commands themselves are platform-specific, but the repository's emulator helper scripts are shell scripts, not PowerShell scripts.

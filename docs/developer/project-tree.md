@@ -1,140 +1,76 @@
-# Project Tree
+# Project Structure
+
+`openvino-notes` is an Android multi-module project. The product direction is an AI-assisted notes app powered by OpenVINO, but the current repository is still in an early implementation stage.
+
+## Repository Layout
 
 ```text
 openvino-notes/
-|-- .github/
-|   |-- actions/
-|   |   `-- setup-android-gradle/
-|   |-- scripts/
-|   |   |-- android/
-|   |   |-- codeql/
-|   |   |-- preflight/
-|   |   |-- pr/
-|   |   |-- quality/
-|   |   |-- release/
-|   |   |-- security/
-|   |   `-- setup/
-|   `-- workflows/
-|-- ai/
-|-- app/
-|-- data/
-|-- docs/
-|   `-- developer/
-|-- domain/
-|-- gradle/
-|-- build.gradle.kts
-|-- detekt.yml
-|-- gradle.properties
-|-- lint.xml
-|-- settings.gradle.kts
-`-- README.md
+├── .github/
+├── ai/
+├── app/
+├── data/
+├── docs/
+├── domain/
+├── gradle/
+├── build.gradle.kts
+├── detekt.yml
+├── gradle.properties
+├── lint.xml
+├── settings.gradle.kts
+└── README.md
 ```
 
-This repository is an Android multi-module project. The application idea is an AI-assisted notes app powered by OpenVINO, but the current codebase is still at an early implementation stage.
+## Modules
 
-```text
-modules
-|-- :app
-|   |-- role
-|   |   |-- Android application module
-|   |   |-- Compose UI
-|   |   `-- app-level wiring
-|   `-- current-state
-|       |-- MainActivity still renders starter content
-|       |-- ui/notes is placeholder UI
-|       |-- ui/editor is placeholder UI
-|       `-- CI debug and androidTest APKs come from here
-|-- :domain
-|   |-- role
-|   |   |-- business contracts
-|   |   |-- models
-|   |   `-- use cases
-|   `-- current-state
-|       |-- Note exists
-|       |-- NotesRepository is placeholder
-|       `-- AnalyzeNoteUseCase is placeholder
-|-- :data
-|   |-- role
-|   |   |-- repository implementations
-|   |   `-- storage and mapping
-|   `-- current-state
-|       |-- structural classes exist
-|       `-- implementation depth is minimal
-`-- :ai
-    |-- role
-    |   |-- OpenVINO-facing inference layer
-    |   `-- result processing
-    `-- current-state
-        |-- named integration points exist
-        `-- production inference behavior is not implemented yet
-```
+| Module | Responsibility | Current state |
+| --- | --- | --- |
+| `:app` | Android app module, Compose UI, app wiring | Basic shell, starter UI, debug and androidTest APKs are produced here |
+| `:domain` | Models, repository contracts, use cases | Mostly placeholder contracts and use cases |
+| `:data` | Repository implementations, storage, mapping | Structure exists, implementation is still minimal |
+| `:ai` | OpenVINO-facing inference and result processing | Integration points exist, production behavior is not implemented yet |
 
-```text
-build-and-quality
-|-- root-config
-|   `-- [build.gradle.kts](/Users/anesterov/repos/openvino-notes/build.gradle.kts)
-|-- enforced-tools
-|   |-- ktlint
-|   |-- detekt
-|   |-- Android Lint
-|   |-- kover
-|   `-- dependency locking
-`-- baseline
-    |-- JDK 17
-    |-- compileSdk 36
-    |-- targetSdk 36
-    |-- minSdk 33
-    |-- Kotlin 2.0.21
-    `-- AGP 8.13.2
-```
+## Build and Quality
 
-```text
-ci
-|-- workflows
-|   |-- ci.yml
-|   |   `-- top-level orchestrator
-|   |-- preflight.yml
-|   |   `-- decides whether release, CodeQL, and emulator jobs should run
-|   |-- quality.yml
-|   |   `-- main developer gate
-|   |       |-- formatting
-|   |       |-- linting
-|   |       |-- debug build
-|   |       |-- host unit tests
-|   |       `-- coverage
-|   |-- security.yml
-|   |   `-- gitleaks
-|   |-- release.yml
-|   |   `-- release assemble and release lint
-|   |-- android-tests.yml
-|   |   `-- emulator validation and instrumentation
-|   |-- codeql.yml
-|   |   `-- CodeQL-oriented build and analysis
-|   `-- supply-chain.yml
-|       `-- dependency review on pull requests
-`-- scripts
-    |-- android/
-    |-- codeql/
-    |-- preflight/
-    |-- pr/
-    |-- quality/
-    |-- release/
-    |-- security/
-    `-- setup/
-```
+Root build logic lives in [build.gradle.kts](/Users/anesterov/repos/openvino-notes/build.gradle.kts).
 
-```text
-contributor-notes
-|-- build-logic-change
-|   `-- check .github/scripts/ before editing workflow YAML
-|-- module-boundary-change
-|   `-- update settings.gradle.kts, module build files, and docs together
-`-- test-failure-interpretation
-    `-- many current tests are scaffolding tests
-        `-- build or packaging regressions are often the first suspect
-```
+Shared tooling:
 
-In practice, this means contributors usually work in one of two directions:
+- `ktlint`
+- `detekt`
+- Android Lint
+- `kover`
+- dependency locking
 
-- application code under `app`, `domain`, `data`, and `ai`
-- build and automation code under `.github/`
+Key versions:
+
+- JDK 17
+- compileSdk 36
+- targetSdk 36
+- minSdk 33
+- Kotlin 2.0.21
+- Android Gradle Plugin 8.13.2
+
+## CI Layout
+
+The CI entry point is `.github/workflows/ci.yml`.
+
+Main reusable workflows:
+
+| Workflow | Purpose |
+| --- | --- |
+| `preflight.yml` | Decides whether expensive jobs should run |
+| `quality.yml` | Formatting, linting, debug build, unit tests, coverage |
+| `security.yml` | Gitleaks |
+| `release.yml` | Release assemble and release lint |
+| `android-tests.yml` | APK validation and emulator instrumentation |
+| `codeql.yml` | CodeQL-oriented build and analysis |
+| `supply-chain.yml` | Dependency review on pull requests |
+
+Most command logic is intentionally kept in `.github/scripts/` rather than embedded directly in workflow YAML.
+
+## Contributor Notes
+
+- If you change build logic, inspect `.github/scripts/` before editing workflow YAML.
+- If you change module boundaries, update `settings.gradle.kts`, relevant module build files, and docs together.
+- Many current tests are scaffolding tests, so build or packaging regressions are often the first thing to check when a CI job fails.
