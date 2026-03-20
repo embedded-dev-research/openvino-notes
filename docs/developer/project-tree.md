@@ -49,8 +49,6 @@ Main reusable workflows:
 | `codeql.yml` | CodeQL-oriented build and analysis |
 | `supply-chain.yml` | Dependency review on pull requests |
 
-Most command logic is intentionally kept in `.github/scripts/` rather than embedded directly in workflow YAML.
-
 ## Contributor Notes
 
 - If you change build logic, inspect `.github/scripts/` before editing workflow YAML.
