@@ -1,10 +1,12 @@
 package com.itlab.data.mapper
 
+import android.util.Log
 import com.itlab.data.entity.MediaEntity
 import com.itlab.data.entity.NoteEntity
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.DataSource
 import com.itlab.domain.model.Note
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -44,14 +46,16 @@ class NoteMapper(
         val items =
             try {
                 json.decodeFromString<List<ContentItem>>(entity.content)
-            } catch (e: Exception) {
+            } catch (e: SerializationException) {
+                Log.e("NoteMapper", "Failed to decode content items", e)
                 emptyList()
             }
 
         val tags =
             try {
                 json.decodeFromString<Set<String>>(entity.tags ?: "[]")
-            } catch (e: Exception) {
+            } catch (e: SerializationException) {
+                Log.e("NoteMapper", "Failed to decode tags", e)
                 emptySet()
             }
 
