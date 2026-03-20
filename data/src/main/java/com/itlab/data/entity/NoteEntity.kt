@@ -11,7 +11,10 @@ data class NoteEntity(
     val id: String,
     val title: String,
     val content: String,
+    val folderId: String? = null,
     val createdAt: Instant = Clock.System.now(),
     val updatedAt: Instant = Clock.System.now(),
+    val tags: String = "[]",
+    val isFavorite: Boolean = false,
     val isSynced: Boolean = false,
 )
