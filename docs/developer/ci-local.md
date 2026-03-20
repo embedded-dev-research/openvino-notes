@@ -409,10 +409,3 @@ cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk build-artif
 APK_ROOT_DIR=build-artifacts RESULTS_ROOT_DIR=android-test-results bash .github/scripts/android/run_all_instrumentation_variants.sh
 ```
 
-## Not Fully Reproducible Locally
-
-- dependency review
-- workflow summaries
-- artifact upload
-- full CodeQL action lifecycle
-
