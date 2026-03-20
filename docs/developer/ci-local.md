@@ -35,6 +35,22 @@ verification-note
         `-- quality, release, CodeQL build, preflight, APK task validation, gitleaks, and emulator instrumentation were reproduced locally
 ```
 
+```text
+linux-arm64-findings
+|-- host
+|   `-- Ubuntu 24.04 arm64
+|-- reproduced
+|   |-- JDK 17 setup
+|   |-- Android SDK command-line tools setup
+|   |-- sdkmanager package install
+|   |-- preflight
+|   `-- security helper failure mode
+`-- differences
+    |-- if local.properties points to another OS path, Gradle prefers it over ANDROID_SDK_ROOT
+    |-- .github/scripts/security/run_gitleaks.sh downloads a linux_x64 binary and fails on arm64
+    `-- Android lint/build path hit Aapt2InternalException: Failed to start AAPT2 process
+```
+
 This guide is written to be executable on Linux, macOS, and Windows. Where the repository already has OS-specific scripts, those scripts are used directly. Where the repository only has a Linux helper, the equivalent native command is shown for the other operating systems.
 
 ```text
@@ -110,6 +126,14 @@ export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
 export ANDROID_HOME="$ANDROID_SDK_ROOT"
 ```
 
+Linux note when the working tree was copied from another host:
+
+```bash
+printf 'sdk.dir=%s\n' "$HOME/Android/Sdk" > local.properties
+```
+
+If `local.properties` contains a path from another OS, Gradle prefers that `sdk.dir` over `ANDROID_SDK_ROOT` and Android tasks fail before the real build starts.
+
 ## Main Developer Gate
 
 ```text
@@ -136,6 +160,17 @@ Linux or macOS:
 bash .github/scripts/quality/run_foundation.sh
 bash .github/scripts/quality/run_debug_build_and_unit_tests.sh
 bash .github/scripts/quality/run_coverage.sh
+```
+
+Linux architecture note:
+
+```text
+linux
+|-- x86_64
+|   `-- closest path to GitHub CI
+`-- arm64
+    |-- SDK setup and preflight were reproduced
+    `-- Android Gradle tasks were not validated because AAPT2 failed to start on Ubuntu 24.04 arm64
 ```
 
 Windows PowerShell:
@@ -168,6 +203,14 @@ foundation
     |-- **/build/reports/ktlint/
     |-- **/build/reports/lint-results-*.html
     `-- **/build/reports/lint-results-*.xml
+```
+
+Linux arm64 note:
+
+```text
+Ubuntu 24.04 arm64
+`-- app lint path failed with
+    `-- Aapt2InternalException: Failed to start AAPT2 process
 ```
 
 ```text
@@ -233,12 +276,22 @@ release
 secrets
 |-- source-of-truth
 |   `-- [run_gitleaks.sh](/Users/anesterov/repos/openvino-notes/.github/scripts/security/run_gitleaks.sh)
-|-- linux
+|-- linux-x86_64
 |   `-- bash .github/scripts/security/run_gitleaks.sh
-`-- macos-windows
-    |-- install native gitleaks
+`-- native-gitleaks
+    |-- linux-arm64
+    |-- macOS
+    |-- Windows
     `-- run
         `-- gitleaks detect --source . --report-format sarif --report-path build/reports/gitleaks/gitleaks.sarif --redact
+```
+
+Linux arm64 note:
+
+```text
+Ubuntu 24.04 arm64
+`-- .github/scripts/security/run_gitleaks.sh failed with
+    `-- cannot execute binary file: Exec format error
 ```
 
 ```text
@@ -298,6 +351,10 @@ android-instrumentation
 |       `-- api 34
 |           `-- x86_64
 |               `-- pixel_7
+|-- linux-arm64
+|   `-- status
+|       `-- not validated
+|           `-- upstream Android build path already failed at AAPT2 startup
 |-- macos-validated-target
 |   `-- local
 |       `-- api 34
