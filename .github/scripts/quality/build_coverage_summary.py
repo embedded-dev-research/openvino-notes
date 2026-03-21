@@ -6,18 +6,26 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
-def read_line_counter(report: Path) -> tuple[int, int] | None:
+MetricCounts = dict[str, tuple[int, int]]
+
+
+def read_counters(report: Path) -> MetricCounts | None:
     try:
         root = ET.parse(report).getroot()
     except ET.ParseError:
         return None
 
+    counters: MetricCounts = {}
     for counter in root.findall("./counter"):
-        if counter.attrib.get("type") == "LINE":
-            covered = int(counter.attrib.get("covered", "0"))
-            missed = int(counter.attrib.get("missed", "0"))
-            return covered, missed
-    return None
+        metric = counter.attrib.get("type")
+        if metric is None:
+            continue
+        counters[metric] = (
+            int(counter.attrib.get("covered", "0")),
+            int(counter.attrib.get("missed", "0")),
+        )
+
+    return counters or None
 
 
 def format_ratio(covered: int, missed: int) -> str:
@@ -35,34 +43,41 @@ def main() -> int:
     reports_root = Path(sys.argv[1])
     output_file = Path(sys.argv[2])
 
-    module_rows: list[tuple[str, int, int]] = []
-    fallback_rows: list[tuple[str, int, int]] = []
+    module_rows: list[tuple[str, MetricCounts]] = []
+    fallback_rows: list[tuple[str, MetricCounts]] = []
 
     for report in sorted(reports_root.glob("**/build/reports/kover/report.xml")):
-        counts = read_line_counter(report)
+        counts = read_counters(report)
         if counts is None:
             continue
 
-        covered, missed = counts
         rel = report.relative_to(reports_root)
         parts = rel.parts
 
         if len(parts) >= 5 and parts[1:5] == ("build", "reports", "kover", "report.xml"):
-            module_rows.append((parts[0], covered, missed))
+            module_rows.append((parts[0], counts))
         else:
-            fallback_rows.append((str(rel.parent), covered, missed))
+            fallback_rows.append((str(rel.parent), counts))
 
     rows = module_rows or fallback_rows
-    total_covered = sum(covered for _, covered, _ in rows)
-    total_missed = sum(missed for _, _, missed in rows)
-    total_lines = total_covered + total_missed
+    total_line_covered = sum(counts.get("LINE", (0, 0))[0] for _, counts in rows)
+    total_line_missed = sum(counts.get("LINE", (0, 0))[1] for _, counts in rows)
+    total_instruction_covered = sum(counts.get("INSTRUCTION", (0, 0))[0] for _, counts in rows)
+    total_instruction_missed = sum(counts.get("INSTRUCTION", (0, 0))[1] for _, counts in rows)
+    total_lines = total_line_covered + total_line_missed
+    total_instructions = total_instruction_covered + total_instruction_missed
 
     lines = [
         "## Coverage",
         "",
         (
-            f"- Overall line coverage: {format_ratio(total_covered, total_missed)} "
-            f"({total_covered} covered / {total_lines} total)"
+            f"- Overall line coverage: {format_ratio(total_line_covered, total_line_missed)} "
+            f"({total_line_covered} covered / {total_lines} total)"
+        ),
+        (
+            f"- Overall instruction coverage: "
+            f"{format_ratio(total_instruction_covered, total_instruction_missed)} "
+            f"({total_instruction_covered} covered / {total_instructions} total)"
         ),
     ]
 
@@ -70,15 +85,17 @@ def main() -> int:
         lines.extend(
             [
                 "",
-                "| Module | Coverage | Covered | Total |",
-                "| --- | ---: | ---: | ---: |",
+                "| Module | Line Coverage | Instruction Coverage |",
+                "| --- | ---: | ---: |",
             ]
         )
 
-        for module, covered, missed in sorted(rows):
-            total = covered + missed
+        for module, counts in sorted(rows):
+            line_covered, line_missed = counts.get("LINE", (0, 0))
+            instruction_covered, instruction_missed = counts.get("INSTRUCTION", (0, 0))
             lines.append(
-                f"| `{module}` | {format_ratio(covered, missed)} | {covered} | {total} |"
+                f"| `{module}` | {format_ratio(line_covered, line_missed)} | "
+                f"{format_ratio(instruction_covered, instruction_missed)} |"
             )
     else:
         lines.extend(["", "- No Kover XML reports found"])
