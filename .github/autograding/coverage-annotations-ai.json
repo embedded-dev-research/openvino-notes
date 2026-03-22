@@ -1,0 +1,26 @@
+{
+  "coverage": [
+    {
+      "name": "AI Coverage Annotations",
+      "maxScore": 100,
+      "coveredPercentageImpact": 1,
+      "missedPercentageImpact": 0,
+      "tools": [
+        {
+          "id": "jacoco",
+          "name": "Line Coverage",
+          "metric": "line",
+          "sourcePath": "ai/src/main/java",
+          "pattern": "**/modules/ai/report.xml"
+        },
+        {
+          "id": "jacoco",
+          "name": "Branch Coverage",
+          "metric": "branch",
+          "sourcePath": "ai/src/main/java",
+          "pattern": "**/modules/ai/report.xml"
+        }
+      ]
+    }
+  ]
+}

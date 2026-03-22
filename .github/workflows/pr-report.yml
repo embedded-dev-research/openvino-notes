@@ -90,28 +90,97 @@ jobs:
           skip-annotations: true
           config: ${{ steps.quality-monitor-config.outputs.json }}
 
-      - name: Load coverage annotations config
-        if: hashFiles('pr-artifacts/modules/*/report.xml') != ''
-        id: coverage-annotations-config
+      - name: Load AI coverage annotations config
+        if: hashFiles('pr-artifacts/modules/ai/report.xml') != ''
+        id: coverage-annotations-ai-config
         shell: bash
         run: |
           {
             echo 'json<<EOF'
-            cat .github/autograding/coverage-annotations.json
+            cat .github/autograding/coverage-annotations-ai.json
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      - name: Publish coverage annotations
-        if: hashFiles('pr-artifacts/modules/*/report.xml') != ''
+      - name: Publish AI coverage annotations
+        if: hashFiles('pr-artifacts/modules/ai/report.xml') != ''
         continue-on-error: true
         uses: uhafner/autograding-github-action@v6.0.1
         env:
           SHA: ${{ github.event.workflow_run.head_sha }}
         with:
           github-token: ${{ github.token }}
-          checks-name: Coverage Annotations
+          checks-name: AI Coverage Annotations
           max-coverage-annotations: 200
-          config: ${{ steps.coverage-annotations-config.outputs.json }}
+          config: ${{ steps.coverage-annotations-ai-config.outputs.json }}
+
+      - name: Load App coverage annotations config
+        if: hashFiles('pr-artifacts/modules/app/report.xml') != ''
+        id: coverage-annotations-app-config
+        shell: bash
+        run: |
+          {
+            echo 'json<<EOF'
+            cat .github/autograding/coverage-annotations-app.json
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish App coverage annotations
+        if: hashFiles('pr-artifacts/modules/app/report.xml') != ''
+        continue-on-error: true
+        uses: uhafner/autograding-github-action@v6.0.1
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          github-token: ${{ github.token }}
+          checks-name: App Coverage Annotations
+          max-coverage-annotations: 200
+          config: ${{ steps.coverage-annotations-app-config.outputs.json }}
+
+      - name: Load Data coverage annotations config
+        if: hashFiles('pr-artifacts/modules/data/report.xml') != ''
+        id: coverage-annotations-data-config
+        shell: bash
+        run: |
+          {
+            echo 'json<<EOF'
+            cat .github/autograding/coverage-annotations-data.json
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish Data coverage annotations
+        if: hashFiles('pr-artifacts/modules/data/report.xml') != ''
+        continue-on-error: true
+        uses: uhafner/autograding-github-action@v6.0.1
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          github-token: ${{ github.token }}
+          checks-name: Data Coverage Annotations
+          max-coverage-annotations: 200
+          config: ${{ steps.coverage-annotations-data-config.outputs.json }}
+
+      - name: Load Domain coverage annotations config
+        if: hashFiles('pr-artifacts/modules/domain/report.xml') != ''
+        id: coverage-annotations-domain-config
+        shell: bash
+        run: |
+          {
+            echo 'json<<EOF'
+            cat .github/autograding/coverage-annotations-domain.json
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish Domain coverage annotations
+        if: hashFiles('pr-artifacts/modules/domain/report.xml') != ''
+        continue-on-error: true
+        uses: uhafner/autograding-github-action@v6.0.1
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          github-token: ${{ github.token }}
+          checks-name: Domain Coverage Annotations
+          max-coverage-annotations: 200
+          config: ${{ steps.coverage-annotations-domain-config.outputs.json }}
 
       - name: Build coverage details comment
         if: hashFiles('pr-artifacts/aggregate/report.xml') != ''

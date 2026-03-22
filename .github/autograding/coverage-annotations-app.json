@@ -1,0 +1,26 @@
+{
+  "coverage": [
+    {
+      "name": "App Coverage Annotations",
+      "maxScore": 100,
+      "coveredPercentageImpact": 1,
+      "missedPercentageImpact": 0,
+      "tools": [
+        {
+          "id": "jacoco",
+          "name": "Line Coverage",
+          "metric": "line",
+          "sourcePath": "app/src/main/java",
+          "pattern": "**/modules/app/report.xml"
+        },
+        {
+          "id": "jacoco",
+          "name": "Branch Coverage",
+          "metric": "branch",
+          "sourcePath": "app/src/main/java",
+          "pattern": "**/modules/app/report.xml"
+        }
+      ]
+    }
+  ]
+}

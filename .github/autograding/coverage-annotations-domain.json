@@ -1,7 +1,7 @@
 {
   "coverage": [
     {
-      "name": "Coverage Annotations",
+      "name": "Domain Coverage Annotations",
       "maxScore": 100,
       "coveredPercentageImpact": 1,
       "missedPercentageImpact": 0,
@@ -10,15 +10,15 @@
           "id": "jacoco",
           "name": "Line Coverage",
           "metric": "line",
-          "sourcePath": ".",
-          "pattern": "**/modules/*/report.xml"
+          "sourcePath": "domain/src/main/java",
+          "pattern": "**/modules/domain/report.xml"
         },
         {
           "id": "jacoco",
           "name": "Branch Coverage",
           "metric": "branch",
-          "sourcePath": ".",
-          "pattern": "**/modules/*/report.xml"
+          "sourcePath": "domain/src/main/java",
+          "pattern": "**/modules/domain/report.xml"
         }
       ]
     }
