@@ -55,4 +55,5 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.room.testing)
+    implementation(libs.timber)
 }

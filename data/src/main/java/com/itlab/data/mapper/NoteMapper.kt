@@ -7,6 +7,7 @@ import com.itlab.domain.model.Note
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import java.util.UUID
 
 class NoteMapper(
@@ -45,7 +46,7 @@ class NoteMapper(
             try {
                 json.decodeFromString<List<ContentItem>>(entity.content)
             } catch (e: SerializationException) {
-                e.printStackTrace()
+                Timber.e(e, "Note content mapping failed for entity: ${entity.id}")
                 emptyList()
             }
 
@@ -53,7 +54,7 @@ class NoteMapper(
             try {
                 json.decodeFromString<Set<String>>(entity.tags ?: "[]")
             } catch (e: SerializationException) {
-                e.printStackTrace()
+                Timber.e(e, "Tags mapping failed for note ${entity.id}. Raw data: ${entity.tags}")
                 emptySet()
             }
 
