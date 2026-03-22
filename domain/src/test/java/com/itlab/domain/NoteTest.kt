@@ -31,9 +31,16 @@ class NoteTest {
         val items =
             listOf(
                 ContentItem.Text("text"),
-                ContentItem.Image(DataSource.Local("path"), "type"),
+                ContentItem.Image(
+                    source = DataSource(localPath = "/cache/images/pic_001.jpg"),
+                    mimeType = "type",
+                ),
                 ContentItem.Link("url"),
-                ContentItem.File(DataSource.Local("path"), "type", "name"),
+                ContentItem.File(
+                    source = DataSource(remoteUrl = "https://url.com"),
+                    mimeType = "type",
+                    name = "name",
+                ),
             )
 
         assertTrue(items[0] is ContentItem.Text)

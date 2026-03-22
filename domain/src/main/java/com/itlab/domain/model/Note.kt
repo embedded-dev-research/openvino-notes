@@ -17,16 +17,11 @@ data class Note(
 )
 
 @Serializable
-sealed class DataSource {
-    @Serializable
-    data class Local(
-        val path: String,
-    ) : DataSource()
-
-    @Serializable
-    data class Remote(
-        val url: String,
-    ) : DataSource()
+data class DataSource(
+    val localPath: String? = null,
+    val remoteUrl: String? = null,
+) {
+    val displayPath: String? get() = localPath ?: remoteUrl
 }
 
 @Serializable
