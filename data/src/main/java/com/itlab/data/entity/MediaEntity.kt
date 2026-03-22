@@ -22,7 +22,7 @@ data class MediaEntity(
     val id: String,
     val noteId: String,
     val type: String,
-    val remoteUrl: String,
+    val remoteUrl: String?,
     val localPath: String?,
     val mimeType: String,
     val size: Long? = null,

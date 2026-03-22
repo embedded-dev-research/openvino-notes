@@ -1,10 +1,8 @@
 package com.itlab.data.mapper
 
-import android.util.Log
 import com.itlab.data.entity.MediaEntity
 import com.itlab.data.entity.NoteEntity
 import com.itlab.domain.model.ContentItem
-import com.itlab.domain.model.DataSource
 import com.itlab.domain.model.Note
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
@@ -47,7 +45,7 @@ class NoteMapper(
             try {
                 json.decodeFromString<List<ContentItem>>(entity.content)
             } catch (e: SerializationException) {
-                Log.e("NoteMapper", "Failed to decode content items", e)
+                e.printStackTrace()
                 emptyList()
             }
 
@@ -55,7 +53,7 @@ class NoteMapper(
             try {
                 json.decodeFromString<Set<String>>(entity.tags ?: "[]")
             } catch (e: SerializationException) {
-                Log.e("NoteMapper", "Failed to decode tags", e)
+                e.printStackTrace()
                 emptySet()
             }
 
@@ -63,6 +61,7 @@ class NoteMapper(
             id = entity.id,
             title = entity.title,
             contentItems = items,
+            folderId = entity.folderId,
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt,
             tags = tags,
@@ -73,33 +72,22 @@ class NoteMapper(
     private fun toMediaEntity(
         item: ContentItem,
         noteId: String,
-    ): MediaEntity? =
-        when (item) {
-            is ContentItem.Image -> {
-                MediaEntity(
-                    id = UUID.randomUUID().toString(),
-                    noteId = noteId,
-                    type = "IMAGE",
-                    remoteUrl = (item.source as? DataSource.Remote)?.url ?: "",
-                    localPath = (item.source as? DataSource.Local)?.path,
-                    mimeType = item.mimeType,
-                )
+    ): MediaEntity? {
+        val (source, type, mimeType) =
+            when (item) {
+                is ContentItem.Image -> Triple(item.source, "IMAGE", item.mimeType)
+                is ContentItem.File -> Triple(item.source, "FILE", item.mimeType)
+                else -> return null
             }
 
-            is ContentItem.File -> {
-                MediaEntity(
-                    id = UUID.randomUUID().toString(),
-                    noteId = noteId,
-                    type = "FILE",
-                    remoteUrl = (item.source as? DataSource.Remote)?.url ?: "",
-                    localPath = (item.source as? DataSource.Local)?.path,
-                    mimeType = item.mimeType,
-                    size = item.size,
-                )
-            }
-
-            else -> {
-                null
-            }
-        }
+        return MediaEntity(
+            id = UUID.randomUUID().toString(),
+            noteId = noteId,
+            type = type,
+            remoteUrl = source.remoteUrl,
+            localPath = source.localPath,
+            mimeType = mimeType,
+            size = (item as? ContentItem.File)?.size,
+        )
+    }
 }
