@@ -1,7 +1,7 @@
 {
   "coverage": [
     {
-      "name": "AI Coverage",
+      "name": "Coverage Annotations",
       "maxScore": 100,
       "coveredPercentageImpact": 1,
       "missedPercentageImpact": 0,
@@ -10,81 +10,15 @@
           "id": "jacoco",
           "name": "Line Coverage",
           "metric": "line",
-          "sourcePath": "ai/src/main/java",
-          "pattern": "pr-artifacts/modules/ai/report.xml"
+          "sourcePath": ".",
+          "pattern": "**/modules/*/report.xml"
         },
         {
           "id": "jacoco",
           "name": "Branch Coverage",
           "metric": "branch",
-          "sourcePath": "ai/src/main/java",
-          "pattern": "pr-artifacts/modules/ai/report.xml"
-        }
-      ]
-    },
-    {
-      "name": "App Coverage",
-      "maxScore": 100,
-      "coveredPercentageImpact": 1,
-      "missedPercentageImpact": 0,
-      "tools": [
-        {
-          "id": "jacoco",
-          "name": "Line Coverage",
-          "metric": "line",
-          "sourcePath": "app/src/main/java",
-          "pattern": "pr-artifacts/modules/app/report.xml"
-        },
-        {
-          "id": "jacoco",
-          "name": "Branch Coverage",
-          "metric": "branch",
-          "sourcePath": "app/src/main/java",
-          "pattern": "pr-artifacts/modules/app/report.xml"
-        }
-      ]
-    },
-    {
-      "name": "Data Coverage",
-      "maxScore": 100,
-      "coveredPercentageImpact": 1,
-      "missedPercentageImpact": 0,
-      "tools": [
-        {
-          "id": "jacoco",
-          "name": "Line Coverage",
-          "metric": "line",
-          "sourcePath": "data/src/main/java",
-          "pattern": "pr-artifacts/modules/data/report.xml"
-        },
-        {
-          "id": "jacoco",
-          "name": "Branch Coverage",
-          "metric": "branch",
-          "sourcePath": "data/src/main/java",
-          "pattern": "pr-artifacts/modules/data/report.xml"
-        }
-      ]
-    },
-    {
-      "name": "Domain Coverage",
-      "maxScore": 100,
-      "coveredPercentageImpact": 1,
-      "missedPercentageImpact": 0,
-      "tools": [
-        {
-          "id": "jacoco",
-          "name": "Line Coverage",
-          "metric": "line",
-          "sourcePath": "domain/src/main/java",
-          "pattern": "pr-artifacts/modules/domain/report.xml"
-        },
-        {
-          "id": "jacoco",
-          "name": "Branch Coverage",
-          "metric": "branch",
-          "sourcePath": "domain/src/main/java",
-          "pattern": "pr-artifacts/modules/domain/report.xml"
+          "sourcePath": ".",
+          "pattern": "**/modules/*/report.xml"
         }
       ]
     }
