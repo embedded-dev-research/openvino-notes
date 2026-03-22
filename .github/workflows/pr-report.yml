@@ -90,6 +90,28 @@ jobs:
           skip-annotations: true
           config: ${{ steps.quality-monitor-config.outputs.json }}
 
+      - name: Load coverage annotations config
+        if: hashFiles('pr-artifacts/modules/*/report.xml') != ''
+        id: coverage-annotations-config
+        shell: bash
+        run: |
+          {
+            echo 'json<<EOF'
+            cat .github/autograding/coverage-annotations.json
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish coverage annotations
+        if: hashFiles('pr-artifacts/modules/*/report.xml') != ''
+        continue-on-error: true
+        uses: uhafner/autograding-github-action@v6.0.1
+        with:
+          github-token: ${{ github.token }}
+          sha: ${{ github.event.workflow_run.head_sha }}
+          checks-name: Coverage Annotations
+          max-coverage-comments: 200
+          config: ${{ steps.coverage-annotations-config.outputs.json }}
+
       - name: Build coverage details comment
         if: hashFiles('pr-artifacts/aggregate/report.xml') != ''
         shell: bash
