@@ -28,10 +28,11 @@ class NoteAndMediaCascadeTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
 
         db =
-            Room.inMemoryDatabaseBuilder(
-                ApplicationProvider.getApplicationContext(),
-                AppDatabase::class.java,
-            ).build()
+            Room
+                .inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext(),
+                    AppDatabase::class.java,
+                ).build()
         noteDao = db.noteDao()
         mediaDao = db.mediaDao()
     }

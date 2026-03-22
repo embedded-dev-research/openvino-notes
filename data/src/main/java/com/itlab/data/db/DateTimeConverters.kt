@@ -5,14 +5,11 @@ import kotlinx.datetime.Instant
 
 class DateTimeConverters {
     @TypeConverter
-    fun fromTimestamp(value: Long?): Instant? {
-        return value?.let {
+    fun fromTimestamp(value: Long?): Instant? =
+        value?.let {
             Instant.fromEpochMilliseconds(it)
         }
-    }
 
     @TypeConverter
-    fun dateToTimestamp(date: Instant?): Long? {
-        return date?.toEpochMilliseconds()
-    }
+    fun dateToTimestamp(date: Instant?): Long? = date?.toEpochMilliseconds()
 }
