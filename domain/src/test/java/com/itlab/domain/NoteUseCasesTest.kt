@@ -99,7 +99,7 @@ class NoteUseCasesTest {
             val notesRepo = FakeNotesRepo()
             val folderRepo = FakeFolderRepo()
 
-            val move = MoveNoteToFolderUseCase(notesRepo, folderRepo)
+            val move = MoveNoteToFolderUseCase(notesRepo)
             val createNote = CreateNoteUseCase(notesRepo)
 
             val folder = NoteFolder(id = "f1", name = "Folder")

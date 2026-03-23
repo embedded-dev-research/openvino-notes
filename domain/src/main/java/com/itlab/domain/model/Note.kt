@@ -16,9 +16,13 @@ data class Note(
 )
 
 sealed class ImageSource {
-    data class Local(val path: String) : ImageSource()
+    data class Local(
+        val path: String,
+    ) : ImageSource()
 
-    data class Remote(val url: String) : ImageSource()
+    data class Remote(
+        val url: String,
+    ) : ImageSource()
 }
 
 sealed class ContentItem {
