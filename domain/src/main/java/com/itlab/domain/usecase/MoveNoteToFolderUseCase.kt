@@ -1,10 +1,10 @@
 package com.itlab.domain.usecase
-import com.itlab.domain.repository.NoteFolderRepository
+
 import com.itlab.domain.repository.NotesRepository
 import kotlinx.datetime.Clock
 
 class MoveNoteToFolderUseCase(
-    private val notesRepo: NotesRepository
+    private val notesRepo: NotesRepository,
 ) {
     suspend operator fun invoke(
         folderId: String,
