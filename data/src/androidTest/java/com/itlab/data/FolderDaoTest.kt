@@ -54,7 +54,7 @@ class FolderDaoTest {
 
     @Test
     fun writeFolderWithEmptyMetadata() =
-        runTest{
+        runTest {
             val folder =
                 FolderEntity(
                     id = "folder_empty",
