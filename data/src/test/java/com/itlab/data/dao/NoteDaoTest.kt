@@ -24,6 +24,8 @@ class NoteDaoTest {
     private lateinit var database: AppDatabase
     private lateinit var noteDao: NoteDao
 
+    val testTime = Instant.parse("2026-03-24T12:00:00Z")
+
     private fun createNote(
         id: String,
         title: String,
@@ -33,6 +35,7 @@ class NoteDaoTest {
         id = id,
         title = title,
         content = "Content",
+        createdAt = testTime,
         updatedAt = updatedAt,
         isSynced = isSynced,
     )

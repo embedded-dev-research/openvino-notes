@@ -4,6 +4,7 @@ import com.itlab.data.entity.NoteEntity
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.DataSource
 import com.itlab.domain.model.Note
+import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -14,6 +15,7 @@ import org.junit.Test
 
 class NoteMapperTest {
     private val mapper = NoteMapper()
+    val testTime = Instant.parse("2026-03-24T12:00:00Z")
 
     @Test
     fun `toEntities should map all content types and media correctly`() {
@@ -82,6 +84,8 @@ class NoteMapperTest {
                 title = "Broken Note",
                 content = "!!not a json!!",
                 tags = "{broken_tags}",
+                createdAt = testTime,
+                updatedAt = testTime,
             )
 
         val result = mapper.toDomain(corruptedEntity)
@@ -121,6 +125,8 @@ class NoteMapperTest {
                 content = json.encodeToString<List<ContentItem>>(originalItems),
                 tags = json.encodeToString<Set<String>>(originalTags),
                 isFavorite = true,
+                createdAt = testTime,
+                updatedAt = testTime,
             )
 
         val resultNote = mapper.toDomain(entity)
@@ -144,6 +150,8 @@ class NoteMapperTest {
                 tags = null,
                 folderId = null,
                 isFavorite = false,
+                createdAt = testTime,
+                updatedAt = testTime,
             )
 
         val resultNote = mapper.toDomain(entityWithNullTags)

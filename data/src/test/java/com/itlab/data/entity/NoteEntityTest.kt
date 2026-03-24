@@ -1,12 +1,15 @@
 package com.itlab.data.entity
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NoteEntityTest {
+    val testTime = Instant.parse("2026-03-24T12:00:00Z")
+
     @Test
     fun `when NoteEntity is created with minimum args, default values are set correctly`() {
         val beforeCreation = Clock.System.now()
@@ -16,6 +19,8 @@ class NoteEntityTest {
                 id = "note_1",
                 title = "Test Title",
                 content = "Test Content",
+                createdAt = testTime,
+                updatedAt = testTime,
             )
         val afterCreation = Clock.System.now()
 
@@ -23,8 +28,8 @@ class NoteEntityTest {
         assertEquals("Test Title", note.title)
         assertEquals("Test Content", note.content)
         assertFalse(note.isSynced)
-        assertTrue(note.createdAt >= beforeCreation && note.createdAt <= afterCreation)
-        assertTrue(note.updatedAt >= beforeCreation && note.updatedAt <= afterCreation)
+        assertEquals(testTime, note.createdAt)
+        assertEquals(testTime, note.updatedAt)
     }
 
     @Test fun `when NoteEntity is fully initialized, all fields match`() {
@@ -47,7 +52,14 @@ class NoteEntityTest {
 
     @Test
     fun `note creation and properties`() {
-        val note = NoteEntity(id = "1", title = "Title", content = "Content")
+        val note =
+            NoteEntity(
+                id = "1",
+                title = "Title",
+                content = "Content",
+                createdAt = testTime,
+                updatedAt = testTime,
+            )
         assertEquals("1", note.id)
         assertEquals("Title", note.title)
         assertEquals(false, note.isSynced)
@@ -85,7 +97,14 @@ class NoteEntityTest {
 
     @Test
     fun `note copy updates fields`() {
-        val note = NoteEntity("1", "Old", "Text")
+        val note =
+            NoteEntity(
+                "1",
+                "Old",
+                "Text",
+                createdAt = testTime,
+                updatedAt = testTime,
+            )
         val updated = note.copy(title = "New", isSynced = true)
 
         assertEquals("New", updated.title)
