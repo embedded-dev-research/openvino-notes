@@ -12,8 +12,6 @@ class NoteEntityTest {
 
     @Test
     fun `when NoteEntity is created with minimum args, default values are set correctly`() {
-        val beforeCreation = Clock.System.now()
-
         val note =
             NoteEntity(
                 id = "note_1",
@@ -22,7 +20,6 @@ class NoteEntityTest {
                 createdAt = testTime,
                 updatedAt = testTime,
             )
-        val afterCreation = Clock.System.now()
 
         assertEquals("note_1", note.id)
         assertEquals("Test Title", note.title)
