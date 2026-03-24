@@ -5,11 +5,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class DateTimeConvertersTest{
+class DateTimeConvertersTest {
     private val converters = DateTimeConverters()
 
-    @Test 
-    fun `fromTimestamp should convert long to instant and handle null`(){
+    @Test
+    fun `fromTimestamp should convert long to instant and handle null`() {
         val timestamp = 1711272000000L
         val expected = Instant.fromEpochMilliseconds(timestamp)
 
@@ -17,8 +17,8 @@ class DateTimeConvertersTest{
         assertNull(converters.fromTimestamp(null))
     }
 
-    @Test 
-    fun `dateToTimestamp should convert instant to long and handle null`(){
+    @Test
+    fun `dateToTimestamp should convert instant to long and handle null`() {
         val timestamp = 1711272000000L
         val instant = Instant.fromEpochMilliseconds(timestamp)
 

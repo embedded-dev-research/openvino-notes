@@ -12,24 +12,27 @@ import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
-class AppDatabaseTest{
+class AppDatabaseTest {
     private lateinit var db: AppDatabase
 
     @Before
     fun createDb() {
-        db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            AppDatabase::class.java
-        ).allowMainThreadQueries().build()
+        db =
+            Room
+                .inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext(),
+                    AppDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
     }
 
-    @After 
-    fun claseDb(){
+    @After
+    fun claseDb() {
         db.close()
     }
 
-    @Test 
-    fun `database should provide all daos`(){
+    @Test
+    fun `database should provide all daos`() {
         assertNotNull(db.noteDao())
         assertNotNull(db.mediaDao())
     }

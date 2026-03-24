@@ -24,13 +24,14 @@ class MediaDaoTest {
     private lateinit var noteDao: NoteDao
 
     private suspend fun insertParentNote(id: String) {
-        val note = com.itlab.data.entity.NoteEntity(
-            id = id,
-            title = "Parent Note",
-            content = "Content",
-            updatedAt = kotlinx.datetime.Instant.fromEpochMilliseconds(0),
-            isSynced = true
-        )
+        val note =
+            com.itlab.data.entity.NoteEntity(
+                id = id,
+                title = "Parent Note",
+                content = "Content",
+                updatedAt = kotlinx.datetime.Instant.fromEpochMilliseconds(0),
+                isSynced = true,
+            )
         noteDao.insert(note)
     }
 
@@ -41,7 +42,7 @@ class MediaDaoTest {
         noteId: String,
         type: String = "audio",
         localPath: String? = defaultPath,
-        remoteUrl: String? = null
+        remoteUrl: String? = null,
     ) = MediaEntity(
         id = id,
         noteId = noteId,
@@ -49,86 +50,94 @@ class MediaDaoTest {
         remoteUrl = remoteUrl,
         localPath = localPath,
         mimeType = "audio/mpeg",
-        size = 1024L
+        size = 1024L,
     )
 
     @Before
-    fun setup(){
-        database = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            AppDatabase::class.java
-        ).allowMainThreadQueries().build()
+    fun setup() {
+        database =
+            Room
+                .inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext(),
+                    AppDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
 
         mediaDao = database.mediaDao()
         noteDao = database.noteDao()
     }
 
-    @After 
-    fun cleanup(){
+    @After
+    fun cleanup() {
         database.close()
     }
 
-    @Test 
-    fun `insert and getMediaForNote should return correct media with paths`() = runTest{
-        val noteId = "note1"
-        insertParentNote(noteId)
+    @Test
+    fun `insert and getMediaForNote should return correct media with paths`() =
+        runTest {
+            val noteId = "note1"
+            insertParentNote(noteId)
 
-        val audioPath = defaultPath
-        val media = createMedia(id = "m1", noteId = "note1", localPath = audioPath)
+            val audioPath = defaultPath
+            val media = createMedia(id = "m1", noteId = "note1", localPath = audioPath)
 
-        mediaDao.insert(media)
+            mediaDao.insert(media)
 
-        val result = mediaDao.getMediaForNote("note1")
+            val result = mediaDao.getMediaForNote("note1")
 
-        assertEquals(1, result.size)
-        assertEquals(audioPath, result[0].localPath)
-        assertEquals("audio/mpeg", result[0].mimeType)
-    }
+            assertEquals(1, result.size)
+            assertEquals(audioPath, result[0].localPath)
+            assertEquals("audio/mpeg", result[0].mimeType)
+        }
 
-    @Test 
-    fun `insertAll should handle list of media and replace on conflict`() = runTest{
-        val noteId = "note1"
-        insertParentNote(noteId)
+    @Test
+    fun `insertAll should handle list of media and replace on conflict`() =
+        runTest {
+            val noteId = "note1"
+            insertParentNote(noteId)
 
-        val list = listOf(
-            createMedia("m1", "note1"),
-            createMedia("m2", "note1")
-        )
+            val list =
+                listOf(
+                    createMedia("m1", "note1"),
+                    createMedia("m2", "note1"),
+                )
 
-        mediaDao.insertAll(list)
+            mediaDao.insertAll(list)
 
-        val updatedMedia = createMedia("m1", "note1", remoteUrl = "https://s3.yandex.net/bucket/audio.mp3")
-        mediaDao.insertAll(listOf(updatedMedia))
+            val updatedMedia = createMedia("m1", "note1", remoteUrl = "https://s3.yandex.net/bucket/audio.mp3")
+            mediaDao.insertAll(listOf(updatedMedia))
 
-        val result = mediaDao.getMediaForNote("note1")
-        val m1 = result.find { it.id == "m1" }
-        
-        assertEquals(2, result.size)
-        assertEquals("https://s3.yandex.net/bucket/audio.mp3", m1?.remoteUrl)
-    }
+            val result = mediaDao.getMediaForNote("note1")
+            val m1 = result.find { it.id == "m1" }
 
-    @Test 
-    fun `getMediaForNoteFlow should notify about changes`() = runTest{
-        val noteId = "note1"
-        insertParentNote(noteId)
+            assertEquals(2, result.size)
+            assertEquals("https://s3.yandex.net/bucket/audio.mp3", m1?.remoteUrl)
+        }
 
-        val media = createMedia("m1", "note1")
-        mediaDao.insert(media)
+    @Test
+    fun `getMediaForNoteFlow should notify about changes`() =
+        runTest {
+            val noteId = "note1"
+            insertParentNote(noteId)
 
-        val flowResult = mediaDao.getMediaForNoteFlow("note1").first()
-        assertEquals(1, flowResult.size)
-    }
+            val media = createMedia("m1", "note1")
+            mediaDao.insert(media)
 
-    @Test 
-    fun `delete should remove specific media entity`() = runTest{
-        val noteId = "note1"
-        insertParentNote(noteId)
-        
-        val media = createMedia("m1", "note1")
-        mediaDao.insert(media)
-        mediaDao.delete(media)
+            val flowResult = mediaDao.getMediaForNoteFlow("note1").first()
+            assertEquals(1, flowResult.size)
+        }
 
-        val result = mediaDao.getMediaForNote("note1")
-        assertTrue(result.isEmpty())
-    }
+    @Test
+    fun `delete should remove specific media entity`() =
+        runTest {
+            val noteId = "note1"
+            insertParentNote(noteId)
+
+            val media = createMedia("m1", "note1")
+            mediaDao.insert(media)
+            mediaDao.delete(media)
+
+            val result = mediaDao.getMediaForNote("note1")
+            assertTrue(result.isEmpty())
+        }
 }
