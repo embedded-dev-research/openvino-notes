@@ -13,6 +13,7 @@ data class Note(
     val updatedAt: Instant = Clock.System.now(),
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
+    val summary: String? = null,
 )
 
 sealed class ImageSource {
