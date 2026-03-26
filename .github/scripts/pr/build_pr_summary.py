@@ -63,23 +63,6 @@ def count_sarif_results(files: list[Path]) -> int:
     return count
 
 
-def aggregate_line_coverage(files: list[Path]) -> tuple[int, int]:
-    covered = 0
-    missed = 0
-    for file in files:
-        try:
-            root = ET.parse(file).getroot()
-        except ET.ParseError:
-            continue
-
-        for counter in root.findall("./counter"):
-            if counter.attrib.get("type") == "LINE":
-                covered += int(counter.attrib.get("covered", "0"))
-                missed += int(counter.attrib.get("missed", "0"))
-                break
-    return covered, missed
-
-
 def format_test_line(label: str, metrics: dict[str, int]) -> str:
     total_failures = metrics["failures"] + metrics["errors"]
     status = "PASS" if total_failures == 0 else "FAIL"
@@ -104,7 +87,6 @@ def main() -> int:
     instrumentation_xml = sorted(artifacts_dir.glob("**/instrumentation-results.xml"))
     lint_xml = sorted(artifacts_dir.glob("**/build/reports/lint-results-*.xml"))
     ktlint_xml = sorted(artifacts_dir.glob("**/build/reports/ktlint/**/*.xml"))
-    kover_xml = sorted(artifacts_dir.glob("**/build/reports/kover/**/*.xml"))
     detekt_sarif = sorted(artifacts_dir.glob("**/build/reports/detekt/*.sarif"))
     gitleaks_sarif = sorted(artifacts_dir.glob("**/build/reports/gitleaks/*.sarif"))
 
@@ -114,10 +96,6 @@ def main() -> int:
     ktlint_issues = count_ktlint_issues(ktlint_xml)
     detekt_findings = count_sarif_results(detekt_sarif)
     gitleaks_findings = count_sarif_results(gitleaks_sarif)
-    covered, missed = aggregate_line_coverage(kover_xml)
-    total_lines = covered + missed
-    coverage = (covered / total_lines * 100.0) if total_lines else None
-
     pr_number = sys.argv[3]
     head_sha = sys.argv[4]
     run_url = sys.argv[5]
@@ -145,13 +123,6 @@ def main() -> int:
         f"- detekt: {detekt_findings} finding(s) uploaded via SARIF" if detekt_sarif else "- detekt: no SARIF reports found",
         f"- gitleaks: {gitleaks_findings} finding(s) uploaded via SARIF" if gitleaks_sarif else "- gitleaks: no SARIF reports found",
         "- CodeQL: see the Code Scanning section in this PR",
-        "",
-        "### Coverage",
-        (
-            f"- Line coverage: {coverage:.2f}% ({covered} covered / {total_lines} total)"
-            if coverage is not None
-            else "- Line coverage: no Kover XML reports found"
-        ),
     ]
 
     output_file.write_text("\n".join(line for line in lines if line is not None) + "\n")
