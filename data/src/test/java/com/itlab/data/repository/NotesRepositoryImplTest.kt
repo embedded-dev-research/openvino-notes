@@ -208,37 +208,40 @@ class NotesRepositoryImplTest {
         }
 
     @Test
-    fun `getNoteById returns mapped domain note when entity exists`() = runTest {
-        val noteId = "note_123"
-        val entity = mockk<NoteEntity>(relaxed = true)
+    fun `getNoteById returns mapped domain note when entity exists`() =
+        runTest {
+            val noteId = "note_123"
+            val entity = mockk<NoteEntity>(relaxed = true)
 
-        coEvery { noteDao.getNoteByld(noteId) } returns entity
+            coEvery { noteDao.getNoteByld(noteId) } returns entity
 
-        val result = repository.getNoteById(noteId)
+            val result = repository.getNoteById(noteId)
 
-        assertNotNull(result)
-    }
+            assertNotNull(result)
+        }
 
     @Test
-    fun `saveNote inserts media entities when note has media`() = runTest {
-        // Создаем элемент с картинкой
-        val imageItem = ContentItem.Image(
-            source = DataSource(localPath = "local/path.jpg", remoteUrl = null),
-            mimeType = "image/jpeg"
-        )
-        // Создаем заметку с этой картинкой
-        val noteWithMedia = Note(
-            id = "note_with_pic",
-            title = "Vacation",
-            contentItems = listOf(imageItem) // <- Из-за этого mediaEntities.isNotEmpty() будет true
-        )
+    fun `saveNote inserts media entities when note has media`() =
+        runTest {
+            // Создаем элемент с картинкой
+            val imageItem =
+                ContentItem.Image(
+                    source = DataSource(localPath = "local/path.jpg", remoteUrl = null),
+                    mimeType = "image/jpeg",
+                )
+            // Создаем заметку с этой картинкой
+            val noteWithMedia =
+                Note(
+                    id = "note_with_pic",
+                    title = "Vacation",
+                    contentItems = listOf(imageItem), // <- Из-за этого mediaEntities.isNotEmpty() будет true
+                )
 
-        coEvery { noteDao.insert(any()) } just Runs
-        coEvery { mediaDao.insertAll(any()) } just Runs
+            coEvery { noteDao.insert(any()) } just Runs
+            coEvery { mediaDao.insertAll(any()) } just Runs
 
-        repository.updateNote(noteWithMedia)
+            repository.updateNote(noteWithMedia)
 
-        coVerify(exactly = 1) { mediaDao.insertAll(any()) }
-    }
-
+            coVerify(exactly = 1) { mediaDao.insertAll(any()) }
+        }
 }
