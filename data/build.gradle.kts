@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.detekt)
     kotlin("plugin.serialization")
 }
 
@@ -57,6 +58,7 @@ dependencies {
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.androidx.junit)
     testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.room.testing)
