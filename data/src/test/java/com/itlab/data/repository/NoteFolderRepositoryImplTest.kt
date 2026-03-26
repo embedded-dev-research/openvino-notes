@@ -1,9 +1,9 @@
 package com.itlab.data.repository
 
 import com.itlab.data.dao.FolderDao
+import com.itlab.data.entity.FolderEntity
 import com.itlab.data.mapper.NoteFolderMapper
 import com.itlab.domain.model.NoteFolder
-import com.itlab.data.entity.FolderEntity
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -124,31 +124,31 @@ class NoteFolderRepositoryImplTest {
         }
 
     @Test
-    fun `createFolder inserts entity and returns correct id`() = runTest {
-        val folder = NoteFolder(id = "folder_777", name = "Test Folder")
+    fun `createFolder inserts entity and returns correct id`() =
+        runTest {
+            val folder = NoteFolder(id = "folder_777", name = "Test Folder")
 
-        coEvery { folderDao.insert(any()) } just Runs
+            coEvery { folderDao.insert(any()) } just Runs
 
-        val resultId = repository.createFolder(folder)
+            val resultId = repository.createFolder(folder)
 
-        coVerify { folderDao.insert(any()) }
-        assertEquals("folder_777", resultId)
-    }
+            coVerify { folderDao.insert(any()) }
+            assertEquals("folder_777", resultId)
+        }
 
     @Test
-    fun `deleteFolder calls dao delete when folder is found`() = runTest {
-        val folderId = "target_id"
-        val entity = mockk<FolderEntity>(relaxed = true)
+    fun `deleteFolder calls dao delete when folder is found`() =
+        runTest {
+            val folderId = "target_id"
+            val entity = mockk<FolderEntity>(relaxed = true)
 
-        // Возвращаем реальный объект, чтобы зайти внутрь ?.let
-        coEvery { folderDao.getFolderById(folderId) } returns entity
-        coEvery { folderDao.delete(entity) } just Runs
+            // Возвращаем реальный объект, чтобы зайти внутрь ?.let
+            coEvery { folderDao.getFolderById(folderId) } returns entity
+            coEvery { folderDao.delete(entity) } just Runs
 
-        repository.deleteFolder(folderId)
+            repository.deleteFolder(folderId)
 
-        // Эта проверка гасит красную строку `folderDao.delete(it)`
-        coVerify(exactly = 1) { folderDao.delete(entity) }
-    }
-
-
+            // Эта проверка гасит красную строку `folderDao.delete(it)`
+            coVerify(exactly = 1) { folderDao.delete(entity) }
+        }
 }
