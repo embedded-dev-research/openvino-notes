@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
+    kotlin("plugin.serialization") version "2.3.20" apply false
 }
 
 configure<KtlintExtension> {
@@ -112,6 +113,7 @@ subprojects {
     }
 
     tasks.withType<Detekt>().configureEach {
+        jvmTarget = "21"
         reports {
             html.required.set(true)
             md.required.set(false)
