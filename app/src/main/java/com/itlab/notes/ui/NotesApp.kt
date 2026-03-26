@@ -1,47 +1,48 @@
 package com.itlab.notes.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.itlab.notes.ui.notes.DirectoriesScreen
+import com.itlab.notes.ui.editor.editorScreen
 import com.itlab.notes.ui.notes.DirectoryItemUi
 import com.itlab.notes.ui.notes.NoteItemUi
-import com.itlab.notes.ui.notes.NotesListScreen
+import com.itlab.notes.ui.notes.directoriesScreen
+import com.itlab.notes.ui.notes.notesListScreen
 
 @Composable
-fun NotesApp() {
-    var selectedDirectory: DirectoryItemUi? by remember { mutableStateOf(null) }
+fun notesApp() {
+    val viewModel = remember { NotesViewModel() }
+    val state = viewModel.uiState
 
-    val dir = selectedDirectory
-    if (dir == null) {
-        DirectoriesScreen(
-            onDirectoryClick = { selectedDirectory = it }
-        )
-    } else {
-        NotesListScreen(
-            directoryName = dir.name,
-            notes = notesFallbackForDirectory(dir),
-            onBack = { selectedDirectory = null },
-            onNoteClick = { }
-        )
+    when (val screen = state.screen) {
+        NotesUiScreen.Directories -> {
+            directoriesScreen(
+                directories = state.directories,
+                onDirectoryClick = { directory ->
+                    viewModel.onEvent(NotesUiEvent.OpenDirectory(directory))
+                },
+            )
+        }
+
+        is NotesUiScreen.DirectoryNotes -> {
+            val directory: DirectoryItemUi = screen.directory
+            notesListScreen(
+                directoryName = directory.name,
+                notes = state.notes,
+                onBack = { viewModel.onEvent(NotesUiEvent.BackToDirectories) },
+                onAddNoteClick = { viewModel.onEvent(NotesUiEvent.CreateNote) },
+                onNoteClick = { note: NoteItemUi ->
+                    viewModel.onEvent(NotesUiEvent.OpenNote(note))
+                },
+            )
+        }
+
+        is NotesUiScreen.NoteEditor -> {
+            editorScreen(
+                directoryName = screen.directory.name,
+                note = screen.note,
+                onBack = { viewModel.onEvent(NotesUiEvent.BackToDirectoryNotes) },
+                onSave = { updated -> viewModel.onEvent(NotesUiEvent.SaveNote(updated)) },
+            )
+        }
     }
 }
-
-private fun notesFallbackForDirectory(directory: DirectoryItemUi): List<NoteItemUi> =
-    when (directory.name) {
-        "My Study" -> listOf(
-            NoteItemUi("Lecture notes", "Topic: coroutines\n- suspend\n- scope\n- dispatcher"),
-            NoteItemUi("Homework", "Due Friday.\nChecklist:\n1) ...\n2) ...")
-        )
-        "How to Cook" -> listOf(
-            NoteItemUi("Cherry pie", "Ingredients:\n- Flour 300g\n- Cherries 200g\n- Sugar 120g"),
-            NoteItemUi("Pasta", "Sauce: tomatoes + garlic + basil.\nTime: 20 minutes.")
-        )
-        else -> listOf(
-            NoteItemUi("First note", "Temporary placeholder while notes load from the data layer."),
-            NoteItemUi("Second note", "Connect the data layer and pass the list into UI.")
-        )
-    }
-
