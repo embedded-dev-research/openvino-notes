@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.itlab.notes.ui.notes.NoteItemUi
 
-class EditorViewModel(initialNote: NoteItemUi) {
+class EditorViewModel(
+    initialNote: NoteItemUi,
+) {
     private val noteId: String = initialNote.id
 
     var title: String by mutableStateOf(initialNote.title)

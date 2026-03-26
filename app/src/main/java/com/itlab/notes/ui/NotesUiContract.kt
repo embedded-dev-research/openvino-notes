@@ -10,7 +10,9 @@ import com.itlab.notes.ui.notes.NoteItemUi
 sealed interface NotesUiScreen {
     data object Directories : NotesUiScreen
 
-    data class DirectoryNotes(val directory: DirectoryItemUi) : NotesUiScreen
+    data class DirectoryNotes(
+        val directory: DirectoryItemUi,
+    ) : NotesUiScreen
 
     data class NoteEditor(
         val directory: DirectoryItemUi,
@@ -25,17 +27,23 @@ data class NotesUiState(
 )
 
 sealed interface NotesUiEvent {
-    data class OpenDirectory(val directory: DirectoryItemUi) : NotesUiEvent
+    data class OpenDirectory(
+        val directory: DirectoryItemUi,
+    ) : NotesUiEvent
 
     data object BackToDirectories : NotesUiEvent
 
-    data class OpenNote(val note: NoteItemUi) : NotesUiEvent
+    data class OpenNote(
+        val note: NoteItemUi,
+    ) : NotesUiEvent
 
     data object CreateNote : NotesUiEvent
 
     data object BackToDirectoryNotes : NotesUiEvent
 
-    data class SaveNote(val note: NoteItemUi) : NotesUiEvent
+    data class SaveNote(
+        val note: NoteItemUi,
+    ) : NotesUiEvent
 }
 
 interface NotesViewModelContract {
