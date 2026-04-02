@@ -85,8 +85,12 @@ private fun editorTopBar(
             }
         },
         colors =
-            TopAppBarDefaults.centerAlignedTopAppBarColors(
+            TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Unspecified,
+                navigationIconContentColor = Color.Unspecified,
+                titleContentColor = Color.Unspecified,
+                actionIconContentColor = Color.Unspecified,
             ),
     )
 }

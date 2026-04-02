@@ -48,54 +48,90 @@ fun notesListScreen(
     Scaffold(
         containerColor = colors.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(directoryName, color = colors.onSurface) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = colors.onSurface,
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.Transparent,
-                    ),
+            notesTopBar(
+                directoryName = directoryName,
+                onBack = onBack,
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddNoteClick,
-                containerColor = colors.primary,
-            ) {
+            notesFab(onAddNoteClick = onAddNoteClick)
+        },
+    ) { paddingValues ->
+        notesListContent(
+            notes = notes,
+            paddingValues = paddingValues,
+            onNoteClick = onNoteClick,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun notesTopBar(
+    directoryName: String,
+    onBack: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    CenterAlignedTopAppBar(
+        title = { Text(directoryName, color = colors.onSurface) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
                 Icon(
-                    Icons.Default.Add,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    tint = colors.onPrimary,
+                    tint = colors.onSurface,
                 )
             }
         },
-    ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-        ) {
-            searchField()
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Unspecified,
+                navigationIconContentColor = Color.Unspecified,
+                titleContentColor = Color.Unspecified,
+                actionIconContentColor = Color.Unspecified,
+            ),
+    )
+}
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(top = 4.dp),
-            ) {
-                items(notes) { note ->
-                    noteCard(
-                        note = note,
-                        onClick = { onNoteClick(note) },
-                    )
-                }
+@Composable
+private fun notesFab(onAddNoteClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    FloatingActionButton(
+        onClick = onAddNoteClick,
+        containerColor = colors.primary,
+    ) {
+        Icon(
+            Icons.Default.Add,
+            contentDescription = null,
+            tint = colors.onPrimary,
+        )
+    }
+}
+
+@Composable
+private fun notesListContent(
+    notes: List<NoteItemUi>,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    onNoteClick: (NoteItemUi) -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+    ) {
+        searchField()
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(top = 4.dp),
+        ) {
+            items(notes) { note ->
+                noteCard(
+                    note = note,
+                    onClick = { onNoteClick(note) },
+                )
             }
         }
     }
