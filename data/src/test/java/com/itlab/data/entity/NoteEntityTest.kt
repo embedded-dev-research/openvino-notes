@@ -19,6 +19,7 @@ class NoteEntityTest {
                 content = "Test Content",
                 createdAt = testTime,
                 updatedAt = testTime,
+                summary = "about content",
             )
 
         assertEquals("note_1", note.id)
@@ -27,6 +28,7 @@ class NoteEntityTest {
         assertFalse(note.isSynced)
         assertEquals(testTime, note.createdAt)
         assertEquals(testTime, note.updatedAt)
+        assertEquals(note.summary, "about content")
     }
 
     @Test fun `when NoteEntity is fully initialized, all fields match`() {
