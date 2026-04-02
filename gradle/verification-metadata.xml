@@ -4,6 +4,7 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
+         <trust group="com.google.guava" name="guava-parent" version="33.4.8-jre" reason="Updated version after merge"/>
          <trust group="org.jetbrains.kotlin" name="kotlin-stdlib-common" version="2.3.20" reason="Dependency locking mismatch after merge from main"/>
          <trust group="org.jetbrains.intellij.deps.kotlinx" name="kotlinx-coroutines-bom" version="1.8.0-intellij-14" reason="Missing in verification metadata after merge"/>
          <trust group="com.google.guava" name="guava-parent" version="33.2.1-jre" reason="Missing or invalid checksum in CI after merge"/>
