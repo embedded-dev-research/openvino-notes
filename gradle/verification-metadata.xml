@@ -4,6 +4,7 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
+         <trust group="org.jetbrains.intellij.deps.kotlinx" name="kotlinx-coroutines-bom" version="1.8.0-intellij-14" reason="Missing in verification metadata after merge"/>
          <trust group="com.google.guava" name="guava-parent" version="33.2.1-jre" reason="Missing or invalid checksum in CI after merge"/>
          <trust group="com.android.application" name="com.android.application.gradle.plugin" version="8.13.2" file="com.android.application.gradle.plugin-8.13.2.pom" reason="Plugin marker POM resolved via repository-specific metadata in CI"/>
          <trust group="com.android.library" name="com.android.library.gradle.plugin" version="8.13.2" file="com.android.library.gradle.plugin-8.13.2.pom" reason="Plugin marker POM resolved via repository-specific metadata in CI"/>
