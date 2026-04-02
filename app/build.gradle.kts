@@ -8,13 +8,13 @@ plugins {
 android {
     namespace = "com.itlab.notes"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.itlab.notes"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
