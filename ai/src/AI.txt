@@ -123,6 +123,7 @@ java -cp ".:java-api-1.0-SNAPSHOT.jar:jna.jar" Phi2Summary
 # C  [libc.so.6+0xabe97]
 
 //Аналогично выходит с Cotype-Nano-Pro, resnet50-v2-7
+//В примере используется https://huggingface.co/OpenVINO/phi-2-int4-ov
 
 
 
