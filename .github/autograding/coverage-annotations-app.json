@@ -1,0 +1,27 @@
+{
+  "coverage": [
+    {
+      "name": "App Coverage Annotations",
+      "sourcePath": "app/src/main/java",
+      "maxScore": 100,
+      "coveredPercentageImpact": 1,
+      "missedPercentageImpact": 0,
+      "tools": [
+        {
+          "id": "jacoco",
+          "name": "Line Coverage",
+          "metric": "line",
+          "sourcePath": "app/src/main/java",
+          "pattern": "**/pr-artifacts/app/build/reports/kover/report.xml"
+        },
+        {
+          "id": "jacoco",
+          "name": "Branch Coverage",
+          "metric": "branch",
+          "sourcePath": "app/src/main/java",
+          "pattern": "**/pr-artifacts/app/build/reports/kover/report.xml"
+        }
+      ]
+    }
+  ]
+}

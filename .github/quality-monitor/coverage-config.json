@@ -1,0 +1,24 @@
+{
+  "coverage": [
+    {
+      "name": "Line Coverage",
+      "tools": [
+        {
+          "id": "jacoco",
+          "metric": "line",
+          "pattern": "**/pr-artifacts/build/reports/kover/report.xml"
+        }
+      ]
+    },
+    {
+      "name": "Instruction Coverage",
+      "tools": [
+        {
+          "id": "jacoco",
+          "metric": "instruction",
+          "pattern": "**/pr-artifacts/build/reports/kover/report.xml"
+        }
+      ]
+    }
+  ]
+}

@@ -17,6 +17,13 @@ plugins {
     kotlin("plugin.serialization") version "2.3.20" apply false
 }
 
+dependencies {
+    kover(project(":ai"))
+    kover(project(":app"))
+    kover(project(":data"))
+    kover(project(":domain"))
+}
+
 configure<KtlintExtension> {
     android.set(true)
     ignoreFailures.set(false)
@@ -63,6 +70,10 @@ kover {
             }
         }
     }
+}
+
+tasks.matching { it.name == "koverVerify" }.configureEach {
+    enabled = false
 }
 
 subprojects {

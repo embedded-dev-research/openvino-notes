@@ -255,7 +255,11 @@ jobs:
           name: quality-coverage-reports
           if-no-files-found: ignore
           path: |
-            **/build/reports/kover/**
+            build/reports/kover/report.xml
+            ai/build/reports/kover/report.xml
+            app/build/reports/kover/report.xml
+            data/build/reports/kover/report.xml
+            domain/build/reports/kover/report.xml
 
       - name: Publish coverage summary
         if: always()

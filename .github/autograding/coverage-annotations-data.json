@@ -1,0 +1,27 @@
+{
+  "coverage": [
+    {
+      "name": "Data Coverage Annotations",
+      "sourcePath": "data/src/main/java",
+      "maxScore": 100,
+      "coveredPercentageImpact": 1,
+      "missedPercentageImpact": 0,
+      "tools": [
+        {
+          "id": "jacoco",
+          "name": "Line Coverage",
+          "metric": "line",
+          "sourcePath": "data/src/main/java",
+          "pattern": "**/pr-artifacts/data/build/reports/kover/report.xml"
+        },
+        {
+          "id": "jacoco",
+          "name": "Branch Coverage",
+          "metric": "branch",
+          "sourcePath": "data/src/main/java",
+          "pattern": "**/pr-artifacts/data/build/reports/kover/report.xml"
+        }
+      ]
+    }
+  ]
+}
