@@ -1,5 +1,7 @@
 package com.itlab.notes.ui.notes
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,11 +39,9 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,21 +50,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import kotlin.math.abs
-import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun notesListScreen(
     directoryName: String,
     notes: List<NoteItemUi>,
-    onBack: () -> Unit,
-    onAddNoteClick: () -> Unit,
-    onNoteDelete: (NoteItemUi) -> Unit,
-    onNoteClick: (NoteItemUi) -> Unit,
+    actions: NotesListActions,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -73,21 +68,28 @@ fun notesListScreen(
         topBar = {
             notesTopBar(
                 directoryName = directoryName,
-                onBack = onBack,
+                onBack = actions.onBack,
             )
         },
         floatingActionButton = {
-            notesFab(onAddNoteClick = onAddNoteClick)
+            notesFab(onAddNoteClick = actions.onAddNoteClick)
         },
     ) { paddingValues ->
         notesListContent(
             notes = notes,
             paddingValues = paddingValues,
-            onNoteDelete = onNoteDelete,
-            onNoteClick = onNoteClick,
+            onNoteDelete = actions.onNoteDelete,
+            onNoteClick = actions.onNoteClick,
         )
     }
 }
+
+data class NotesListActions(
+    val onBack: () -> Unit,
+    val onAddNoteClick: () -> Unit,
+    val onNoteDelete: (NoteItemUi) -> Unit,
+    val onNoteClick: (NoteItemUi) -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

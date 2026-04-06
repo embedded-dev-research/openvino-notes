@@ -5,40 +5,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itlab.domain.usecase.CreateNoteUseCase
-import com.itlab.domain.usecase.DeleteFolderUseCase
-import com.itlab.domain.usecase.DeleteNoteUseCase
-import com.itlab.domain.usecase.ObserveFoldersUseCase
-import com.itlab.domain.usecase.ObserveNotesByFolderUseCase
-import com.itlab.domain.usecase.UpdateNoteUseCase
+import com.itlab.domain.model.ContentItem
+import com.itlab.domain.model.Note
+import com.itlab.domain.model.NoteFolder
 import com.itlab.notes.ui.notes.DirectoryItemUi
 import com.itlab.notes.ui.notes.NoteItemUi
 import kotlinx.coroutines.Job
-import com.itlab.domain.model.Note
-import com.itlab.domain.model.NoteFolder
-import com.itlab.domain.model.ContentItem
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.UUID
-import com.itlab.domain.usecase.CreateFolderUseCase
 
 class NotesViewModel(
-    private val createFolderUseCase: CreateFolderUseCase,
-    private val deleteFolderUseCase: DeleteFolderUseCase,
-    private val createNoteUseCase: CreateNoteUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val updateNoteUseCase: UpdateNoteUseCase,
-    private val observeNotesByFolderUseCase: ObserveNotesByFolderUseCase,
-    private val observeFoldersUseCase: ObserveFoldersUseCase
-) : ViewModel(), NotesViewModelContract {
+    private val useCases: NotesUseCases,
+) : ViewModel(),
+    NotesViewModelContract {
     override var uiState: NotesUiState by mutableStateOf(
         NotesUiState(screen = NotesUiScreen.Directories),
     )
         private set
     private var notesJob: Job? = null
+
     init {
         viewModelScope.launch {
-            observeFoldersUseCase().collect { folders ->
+            useCases.observeFoldersUseCase().collect { folders ->
                 val existingCounts = uiState.directories.associate { it.id to it.noteCount }
                 uiState =
                     uiState.copy(
@@ -57,32 +46,57 @@ class NotesViewModel(
             NotesUiEvent.BackToDirectories -> backToDirectories()
             is NotesUiEvent.OpenNote -> openNote(event.note)
             NotesUiEvent.CreateNote -> createNote()
-            is NotesUiEvent.CreateDirectory -> createDirectory(event.name)
-            is NotesUiEvent.DeleteDirectory -> deleteDirectory(event.directoryId)
+            is NotesUiEvent.CreateDirectory -> {
+                val normalized = event.name.trim()
+                if (normalized.isNotBlank()) {
+                    viewModelScope.launch {
+                        useCases.createFolderUseCase(NoteFolder(name = normalized))
+                    }
+                }
+            }
+
+            is NotesUiEvent.DeleteDirectory -> {
+                if (event.directoryId != "all") {
+                    viewModelScope.launch {
+                        useCases.deleteFolderUseCase(event.directoryId)
+                        if ((uiState.screen as? NotesUiScreen.DirectoryNotes)?.directory?.id == event.directoryId) {
+                            backToDirectories()
+                        }
+                    }
+                }
+            }
+
             NotesUiEvent.BackToDirectoryNotes -> backToDirectoryNotes()
             is NotesUiEvent.SaveNote -> saveNote(event.note)
-            is NotesUiEvent.DeleteNote -> deleteNote(event.noteId)
+            is NotesUiEvent.DeleteNote -> {
+                viewModelScope.launch {
+                    useCases.deleteNoteUseCase(event.noteId)
+                }
+            }
         }
     }
 
-
     private fun openDirectory(directory: DirectoryItemUi) {
-        uiState = uiState.copy(
-            screen = NotesUiScreen.DirectoryNotes(directory = directory),
-            notes = emptyList(),
-        )
+        uiState =
+            uiState.copy(
+                screen = NotesUiScreen.DirectoryNotes(directory = directory),
+                notes = emptyList(),
+            )
         notesJob?.cancel()
         val folderId = directory.id.asDomainFolderId()
-        notesJob = viewModelScope.launch {
-            observeNotesByFolderUseCase(folderId).collect { notes ->
-                uiState = uiState.copy(
-                    notes = notes.map { it.toUi() },
-                    screen = NotesUiScreen.DirectoryNotes(
-                        directory = directory.copy(noteCount = notes.size),
-                    ),
-                )
+        notesJob =
+            viewModelScope.launch {
+                useCases.observeNotesByFolderUseCase(folderId).collect { notes ->
+                    uiState =
+                        uiState.copy(
+                            notes = notes.map { it.toUi() },
+                            screen =
+                                NotesUiScreen.DirectoryNotes(
+                                    directory = directory.copy(noteCount = notes.size),
+                                ),
+                        )
+                }
             }
-        }
     }
 
     private fun backToDirectories() {
@@ -99,11 +113,7 @@ class NotesViewModel(
         if (dir != null) {
             uiState =
                 uiState.copy(
-                    screen =
-                        NotesUiScreen.NoteEditor(
-                            directory = dir,
-                            note = note,
-                        ),
+                    screen = NotesUiScreen.NoteEditor(directory = dir, note = note),
                 )
         }
     }
@@ -119,11 +129,7 @@ class NotesViewModel(
                 )
             uiState =
                 uiState.copy(
-                    screen =
-                        NotesUiScreen.NoteEditor(
-                            directory = dir,
-                            note = newNote,
-                        ),
+                    screen = NotesUiScreen.NoteEditor(directory = dir, note = newNote),
                 )
         }
     }
@@ -131,10 +137,7 @@ class NotesViewModel(
     private fun backToDirectoryNotes() {
         val editor = uiState.screen as? NotesUiScreen.NoteEditor
         if (editor != null) {
-            uiState =
-                uiState.copy(
-                    screen = NotesUiScreen.DirectoryNotes(directory = editor.directory),
-                )
+            uiState = uiState.copy(screen = NotesUiScreen.DirectoryNotes(directory = editor.directory))
         }
     }
 
@@ -142,45 +145,19 @@ class NotesViewModel(
         val editor = uiState.screen as? NotesUiScreen.NoteEditor ?: return
         val folderId = editor.directory.id.asDomainFolderId()
         viewModelScope.launch {
-            val existing = observeNotesByFolderUseCase(folderId)
-                .firstOrNull()
-                .orEmpty()
-                .any { it.id == note.id }
+            val existing =
+                useCases
+                    .observeNotesByFolderUseCase(folderId)
+                    .firstOrNull()
+                    .orEmpty()
+                    .any { it.id == note.id }
             val domainNote = note.toDomain(folderId = folderId)
             if (existing) {
-                updateNoteUseCase(domainNote)
+                useCases.updateNoteUseCase(domainNote)
             } else {
-                createNoteUseCase(domainNote)
+                useCases.createNoteUseCase(domainNote)
             }
-            uiState = uiState.copy(
-                screen = NotesUiScreen.DirectoryNotes(directory = editor.directory),
-            )
-        }
-    }
-
-    private fun deleteNote(noteId: String) {
-        viewModelScope.launch {
-            deleteNoteUseCase(noteId)
-        }
-    }
-
-    private fun createDirectory(name: String) {
-        val normalized = name.trim()
-        if (normalized.isBlank()) return
-        viewModelScope.launch {
-            createFolderUseCase(
-                NoteFolder(name = normalized),
-            )
-        }
-    }
-
-    private fun deleteDirectory(directoryId: String) {
-        if (directoryId == "all") return
-        viewModelScope.launch {
-            deleteFolderUseCase(directoryId)
-            if ((uiState.screen as? NotesUiScreen.DirectoryNotes)?.directory?.id == directoryId) {
-                backToDirectories()
-            }
+            uiState = uiState.copy(screen = NotesUiScreen.DirectoryNotes(directory = editor.directory))
         }
     }
 
@@ -190,23 +167,20 @@ class NotesViewModel(
     }
 }
 
+internal fun NoteFolder.toUi(noteCount: Int): DirectoryItemUi =
+    DirectoryItemUi(id = id, name = name, noteCount = noteCount)
 
-
-private fun NoteFolder.toUi(noteCount: Int): DirectoryItemUi =
-    DirectoryItemUi(
-        id = id,
-        name = name,
-        noteCount = noteCount,
-    )
-private fun Note.toUi(): NoteItemUi =
+internal fun Note.toUi(): NoteItemUi =
     NoteItemUi(
         id = id,
         title = title,
-        content = contentItems
-            .filterIsInstance<ContentItem.Text>()
-            .joinToString("\n") { it.text },
+        content =
+            contentItems
+                .filterIsInstance<ContentItem.Text>()
+                .joinToString("\n") { it.text },
     )
-private fun NoteItemUi.toDomain(folderId: String?): Note =
+
+internal fun NoteItemUi.toDomain(folderId: String?): Note =
     Note(
         id = id,
         title = title,
@@ -214,4 +188,4 @@ private fun NoteItemUi.toDomain(folderId: String?): Note =
         contentItems = listOf(ContentItem.Text(content)),
     )
 
-private fun String.asDomainFolderId(): String? = if (this == "all") null else this
+internal fun String.asDomainFolderId(): String? = if (this == "all") null else this

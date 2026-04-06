@@ -4,13 +4,14 @@ import com.itlab.domain.model.Note
 import com.itlab.domain.model.NoteFolder
 import com.itlab.domain.repository.NoteFolderRepository
 import com.itlab.domain.repository.NotesRepository
-import com.itlab.domain.usecase.CreateNoteUseCase
-import com.itlab.domain.usecase.DeleteNoteUseCase
 import com.itlab.domain.usecase.CreateFolderUseCase
+import com.itlab.domain.usecase.CreateNoteUseCase
 import com.itlab.domain.usecase.DeleteFolderUseCase
+import com.itlab.domain.usecase.DeleteNoteUseCase
 import com.itlab.domain.usecase.ObserveFoldersUseCase
 import com.itlab.domain.usecase.ObserveNotesByFolderUseCase
 import com.itlab.domain.usecase.UpdateNoteUseCase
+import com.itlab.notes.ui.NotesUseCases
 import com.itlab.notes.ui.NotesViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,30 +19,36 @@ import kotlinx.coroutines.flow.map
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-val appModule = module {
-    single<NotesRepository> { InMemoryNotesRepository() }
-    single<NoteFolderRepository> { InMemoryFolderRepository() }
+val appModule =
+    module {
+        single<NotesRepository> { InMemoryNotesRepository() }
+        single<NoteFolderRepository> { InMemoryFolderRepository() }
 
-    factory { CreateNoteUseCase(get()) }
-    factory { CreateFolderUseCase(get()) }
-    factory { DeleteFolderUseCase(get()) }
-    factory { DeleteNoteUseCase(get()) }
-    factory { UpdateNoteUseCase(get()) }
-    factory { ObserveNotesByFolderUseCase(get()) }
-    factory { ObserveFoldersUseCase(get()) }
+        factory { CreateNoteUseCase(get()) }
+        factory { CreateFolderUseCase(get()) }
+        factory { DeleteFolderUseCase(get()) }
+        factory { DeleteNoteUseCase(get()) }
+        factory { UpdateNoteUseCase(get()) }
+        factory { ObserveNotesByFolderUseCase(get()) }
+        factory { ObserveFoldersUseCase(get()) }
+        factory {
+            NotesUseCases(
+                createFolderUseCase = get(),
+                deleteFolderUseCase = get(),
+                createNoteUseCase = get(),
+                deleteNoteUseCase = get(),
+                updateNoteUseCase = get(),
+                observeNotesByFolderUseCase = get(),
+                observeFoldersUseCase = get(),
+            )
+        }
 
-    viewModel {
-        NotesViewModel(
-            createFolderUseCase = get(),
-            deleteFolderUseCase = get(),
-            createNoteUseCase = get(),
-            deleteNoteUseCase = get(),
-            updateNoteUseCase = get(),
-            observeNotesByFolderUseCase = get(),
-            observeFoldersUseCase = get(),
-        )
+        viewModel {
+            NotesViewModel(
+                useCases = get(),
+            )
+        }
     }
-}
 
 private class InMemoryNotesRepository : NotesRepository {
     private val notesFlow = MutableStateFlow<List<Note>>(emptyList())
@@ -59,9 +66,10 @@ private class InMemoryNotesRepository : NotesRepository {
     }
 
     override suspend fun updateNote(note: Note) {
-        notesFlow.value = notesFlow.value.map { existing ->
-            if (existing.id == note.id) note else existing
-        }
+        notesFlow.value =
+            notesFlow.value.map { existing ->
+                if (existing.id == note.id) note else existing
+            }
     }
 
     override suspend fun deleteNote(id: String) {
@@ -91,9 +99,10 @@ private class InMemoryFolderRepository : NoteFolderRepository {
         id: String,
         name: String,
     ) {
-        foldersFlow.value = foldersFlow.value.map { folder ->
-            if (folder.id == id) folder.copy(name = name) else folder
-        }
+        foldersFlow.value =
+            foldersFlow.value.map { folder ->
+                if (folder.id == id) folder.copy(name = name) else folder
+            }
     }
 
     override suspend fun deleteFolder(id: String) {
@@ -103,8 +112,9 @@ private class InMemoryFolderRepository : NoteFolderRepository {
     override suspend fun getFolderById(id: String): NoteFolder? = foldersFlow.value.firstOrNull { it.id == id }
 
     override suspend fun updateFolder(folder: NoteFolder) {
-        foldersFlow.value = foldersFlow.value.map { existing ->
-            if (existing.id == folder.id) folder else existing
-        }
+        foldersFlow.value =
+            foldersFlow.value.map { existing ->
+                if (existing.id == folder.id) folder else existing
+            }
     }
 }
