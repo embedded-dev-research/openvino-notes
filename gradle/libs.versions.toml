@@ -47,6 +47,11 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+mockk = { group = "io.mockk", name = "mockk", version = "1.13.10" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.12.1" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.5.0" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
