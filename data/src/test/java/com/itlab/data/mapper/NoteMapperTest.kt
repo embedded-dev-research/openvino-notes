@@ -39,6 +39,7 @@ class NoteMapperTest {
                         ContentItem.Link("https://google.com"),
                     ),
                 isFavorite = true,
+                summary = "cars",
             )
 
         val (entity, media) = mapper.toEntities(note)
@@ -50,6 +51,7 @@ class NoteMapperTest {
         assertEquals(null, entity.folderId)
         assertEquals(note.createdAt, entity.createdAt)
         assertEquals(note.updatedAt, entity.updatedAt)
+        assertEquals(note.summary, entity.summary)
 
         assertEquals("[\"money\",\"market\"]", entity.tags)
 

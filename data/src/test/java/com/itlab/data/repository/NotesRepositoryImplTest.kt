@@ -223,18 +223,16 @@ class NotesRepositoryImplTest {
     @Test
     fun `saveNote inserts media entities when note has media`() =
         runTest {
-            // Создаем элемент с картинкой
             val imageItem =
                 ContentItem.Image(
                     source = DataSource(localPath = "local/path.jpg", remoteUrl = null),
                     mimeType = "image/jpeg",
                 )
-            // Создаем заметку с этой картинкой
             val noteWithMedia =
                 Note(
                     id = "note_with_pic",
                     title = "Vacation",
-                    contentItems = listOf(imageItem), // <- Из-за этого mediaEntities.isNotEmpty() будет true
+                    contentItems = listOf(imageItem),
                 )
 
             coEvery { noteDao.insert(any()) } just Runs

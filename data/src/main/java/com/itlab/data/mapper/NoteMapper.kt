@@ -36,6 +36,7 @@ class NoteMapper(
                 tags = json.encodeToString(note.tags),
                 isFavorite = note.isFavorite,
                 isSynced = false,
+                summary = note.summary,
             )
 
         return noteEntity to mediaEntities
