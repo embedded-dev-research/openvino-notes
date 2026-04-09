@@ -58,6 +58,14 @@ class NotesViewModel(
             is NotesUiEvent.DeleteDirectory -> {
                 if (event.directoryId != "all") {
                     viewModelScope.launch {
+                        val notesInDirectory =
+                            useCases
+                                .observeNotesByFolderUseCase(event.directoryId)
+                                .firstOrNull()
+                                .orEmpty()
+                        notesInDirectory.forEach { note ->
+                            useCases.deleteNoteUseCase(note.id)
+                        }
                         useCases.deleteFolderUseCase(event.directoryId)
                         if ((uiState.screen as? NotesUiScreen.DirectoryNotes)?.directory?.id == event.directoryId) {
                             backToDirectories()
@@ -126,6 +134,7 @@ class NotesViewModel(
                     id = UUID.randomUUID().toString(),
                     title = "",
                     content = "",
+                    folderId = dir.id.asDomainFolderId(),
                 )
             uiState =
                 uiState.copy(
@@ -143,15 +152,15 @@ class NotesViewModel(
 
     private fun saveNote(note: NoteItemUi) {
         val editor = uiState.screen as? NotesUiScreen.NoteEditor ?: return
-        val folderId = editor.directory.id.asDomainFolderId()
         viewModelScope.launch {
             val existing =
                 useCases
-                    .observeNotesByFolderUseCase(folderId)
+                    .observeNotesByFolderUseCase(null)
                     .firstOrNull()
                     .orEmpty()
                     .any { it.id == note.id }
-            val domainNote = note.toDomain(folderId = folderId)
+            val targetFolderId = note.folderId ?: editor.directory.id.asDomainFolderId()
+            val domainNote = note.toDomain(folderId = targetFolderId)
             if (existing) {
                 useCases.updateNoteUseCase(domainNote)
             } else {
@@ -178,6 +187,7 @@ internal fun Note.toUi(): NoteItemUi =
             contentItems
                 .filterIsInstance<ContentItem.Text>()
                 .joinToString("\n") { it.text },
+        folderId = folderId,
     )
 
 internal fun NoteItemUi.toDomain(folderId: String?): Note =

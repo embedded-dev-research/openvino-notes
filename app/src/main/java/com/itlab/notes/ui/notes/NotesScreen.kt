@@ -154,7 +154,10 @@ private fun notesListContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(top = 4.dp),
         ) {
-            items(notes) { note ->
+            items(
+                items = notes,
+                key = { note -> note.id },
+            ) { note ->
                 var isDeleteDispatched by remember(note.id) { mutableStateOf(false) }
                 val dismissState =
                     rememberSwipeToDismissBoxState(
