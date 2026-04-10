@@ -15,7 +15,7 @@ data class Note(
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
     val summary: String? = null,
-    val syncStatus: SyncStatus = SyncStatus.PENDING
+    val syncStatus: SyncStatus = SyncStatus.PENDING,
 )
 
 @Serializable
@@ -68,5 +68,5 @@ enum class SyncStatus {
     SYNCED,
     PENDING,
     SYNCING,
-    ERROR
+    ERROR,
 }
