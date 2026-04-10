@@ -1,19 +1,20 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.itlab.notes"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.itlab.notes"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -33,22 +34,34 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
     }
     testOptions {
         managedDevices {
             localDevices {
-                create("pixel7api34") {
+                create("pixel7api34X86") {
                     device = "Pixel 7"
                     apiLevel = 34
                     systemImageSource = "aosp-atd"
+                    require64Bit = true
+                    testedAbi = "x86_64"
+                }
+                create("pixel7api34Arm64") {
+                    device = "Pixel 7"
+                    apiLevel = 34
+                    systemImageSource = "aosp-atd"
+                    require64Bit = true
+                    testedAbi = "arm64-v8a"
                 }
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -71,4 +84,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
 }
