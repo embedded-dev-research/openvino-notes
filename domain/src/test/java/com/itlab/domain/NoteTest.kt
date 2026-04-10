@@ -3,6 +3,7 @@ package com.itlab.domain
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.DataSource
 import com.itlab.domain.model.Note
+import kotlinx.datetime.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -18,7 +19,12 @@ class NoteTest {
 
     @Test
     fun note_copy() {
-        val note = Note(title = "A")
+        val note =
+            Note(
+                title = "A",
+                createdAt = Clock.System.now(),
+                updatedAt = Clock.System.now(),
+            )
 
         val updated = note.copy(title = "B")
 

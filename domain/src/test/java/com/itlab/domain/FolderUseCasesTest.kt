@@ -22,9 +22,10 @@ class FolderUseCasesTest {
         override fun observeFolders() = flow
 
         override suspend fun createFolder(folder: NoteFolder): String {
-            store[folder.id] = folder
+            val id = requireNotNull(folder.id)
+            store[id] = folder
             flow.value = store.values.toList()
-            return folder.id
+            return id
         }
 
         override suspend fun renameFolder(
@@ -45,7 +46,8 @@ class FolderUseCasesTest {
         override suspend fun getFolderById(id: String): NoteFolder? = store[id]
 
         override suspend fun updateFolder(folder: NoteFolder) {
-            store[folder.id] = folder
+            val id = requireNotNull(folder.id)
+            store[id] = folder
             flow.value = store.values.toList()
         }
     }
@@ -58,11 +60,12 @@ class FolderUseCasesTest {
             val create = CreateFolderUseCase(repo)
             val get = GetFolderUseCase(repo)
 
-            val folder = NoteFolder(id = "1", name = "Test")
+            val id =
+                create(
+                    NoteFolder(name = "Test"),
+                )
 
-            create(folder)
-
-            val result = get("1")
+            val result = get(id)
 
             assertEquals("Test", result?.name)
         }
@@ -76,13 +79,17 @@ class FolderUseCasesTest {
             val update = UpdateFolderUseCase(repo)
             val get = GetFolderUseCase(repo)
 
-            val folder = NoteFolder(id = "1", name = "Old")
-            create(folder)
+            val id = create(NoteFolder(name = "Old"))
 
-            val updated = folder.copy(name = "New")
+            val updated =
+                NoteFolder(
+                    id = id,
+                    name = "New",
+                )
+
             update(updated)
 
-            val result = get("1")
+            val result = get(id)
 
             assertEquals("New", result?.name)
         }
@@ -96,12 +103,11 @@ class FolderUseCasesTest {
             val delete = DeleteFolderUseCase(repo)
             val get = GetFolderUseCase(repo)
 
-            val folder = NoteFolder(id = "1", name = "Test")
-            create(folder)
+            val id = create(NoteFolder(name = "Test"))
 
-            delete("1")
+            delete(id)
 
-            val result = get("1")
+            val result = get(id)
 
             assertNull(result)
         }
@@ -113,7 +119,7 @@ class FolderUseCasesTest {
             val create = CreateFolderUseCase(repo)
             val observe = ObserveFoldersUseCase(repo)
 
-            create(NoteFolder(id = "1", name = "A"))
+            create(NoteFolder(name = "A"))
 
             val list = observe().first()
 

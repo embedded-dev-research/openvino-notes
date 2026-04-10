@@ -4,6 +4,7 @@ import com.itlab.domain.model.Note
 import com.itlab.domain.model.NoteFolder
 import com.itlab.domain.repository.NoteFolderRepository
 import com.itlab.domain.repository.NotesRepository
+import com.itlab.domain.usecase.CreateFolderUseCase
 import com.itlab.domain.usecase.CreateNoteUseCase
 import com.itlab.domain.usecase.DeleteNoteUseCase
 import com.itlab.domain.usecase.GetNoteUseCase
@@ -29,13 +30,15 @@ class NoteUseCasesTest {
         override suspend fun getNoteById(id: String): Note? = store[id]
 
         override suspend fun createNote(note: Note): String {
-            store[note.id] = note
+            val id = requireNotNull(note.id)
+            store[id] = note
             flow.value = store.values.toList()
-            return note.id
+            return id
         }
 
         override suspend fun updateNote(note: Note) {
-            store[note.id] = note
+            val id = requireNotNull(note.id)
+            store[id] = note
             flow.value = store.values.toList()
         }
 
@@ -51,8 +54,9 @@ class NoteUseCasesTest {
         override fun observeFolders() = MutableStateFlow(emptyList<NoteFolder>())
 
         override suspend fun createFolder(folder: NoteFolder): String {
-            store[folder.id] = folder
-            return folder.id
+            val id = requireNotNull(folder.id)
+            store[id] = folder
+            return id
         }
 
         override suspend fun renameFolder(
@@ -77,19 +81,22 @@ class NoteUseCasesTest {
             val delete = DeleteNoteUseCase(repo)
             val get = GetNoteUseCase(repo)
 
-            val note = Note(id = "n1", title = "A")
+            val id = create(Note(title = "A"))
 
-            create(note)
+            val updated =
+                Note(
+                    id = id,
+                    title = "B",
+                )
 
-            val updated = note.copy(title = "B")
             update(updated)
 
-            val result = get("n1")
+            val result = get(id)
             assertEquals("B", result?.title)
 
-            delete("n1")
+            delete(id)
 
-            val result2 = get("n1")
+            val result2 = get(id)
             assertNull(result2)
         }
 
@@ -101,18 +108,16 @@ class NoteUseCasesTest {
 
             val move = MoveNoteToFolderUseCase(notesRepo)
             val createNote = CreateNoteUseCase(notesRepo)
+            val createFolder = CreateFolderUseCase(folderRepo)
 
-            val folder = NoteFolder(id = "f1", name = "Folder")
-            folderRepo.createFolder(folder)
+            val folderId = createFolder(NoteFolder(name = "Folder"))
+            val noteId = createNote(Note(title = "Note"))
 
-            val note = Note(id = "n1", title = "Note")
-            createNote(note)
+            move(folderId, noteId)
 
-            move("f1", "n1")
+            val updated = notesRepo.getNoteById(noteId)
 
-            val updated = notesRepo.getNoteById("n1")
-
-            assertEquals("f1", updated?.folderId)
+            assertEquals(folderId, updated?.folderId)
         }
 
     @Test
@@ -122,7 +127,7 @@ class NoteUseCasesTest {
             val observe = ObserveNotesUseCase(repo)
             val create = CreateNoteUseCase(repo)
 
-            create(Note(id = "n1", title = "Test"))
+            create(Note(title = "Test"))
 
             val list = observe().first()
 

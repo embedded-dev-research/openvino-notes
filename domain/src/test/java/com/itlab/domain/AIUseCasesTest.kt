@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Test
@@ -32,13 +33,15 @@ class AIUseCasesTest {
         override suspend fun getNoteById(id: String): Note? = store[id]
 
         override suspend fun createNote(note: Note): String {
-            store[note.id] = note
+            val id = requireNotNull(note.id) { "Note id must not be null" }
+            store[id] = note
             flow.value = store.values.toList()
-            return note.id
+            return id
         }
 
         override suspend fun updateNote(note: Note) {
-            store[note.id] = note
+            val id = requireNotNull(note.id) { "Note id must not be null" }
+            store[id] = note
             flow.value = store.values.toList()
         }
 
@@ -79,11 +82,14 @@ class AIUseCasesTest {
             val repo = FakeNotesRepo()
             val ai = FakeNoteAiService()
             val useCase = SuggestSummaryUseCase(ai, repo)
+            val now = Clock.System.now()
 
             val note =
                 Note(
                     id = "n1",
                     title = "Test",
+                    createdAt = now,
+                    updatedAt = now,
                     contentItems =
                         listOf(
                             ContentItem.Text("Hello"),
@@ -122,11 +128,14 @@ class AIUseCasesTest {
             val repo = FakeNotesRepo()
             val ai = FakeNoteAiService()
             val useCase = SuggestTagsUseCase(ai, repo)
+            val now = Clock.System.now()
 
             val note =
                 Note(
                     id = "n2",
                     title = "Tags",
+                    createdAt = now,
+                    updatedAt = now,
                     contentItems =
                         listOf(
                             ContentItem.Text("First line"),
@@ -177,11 +186,14 @@ class AIUseCasesTest {
         runBlocking {
             val repo = FakeNotesRepo()
             val useCase = ApplySummaryUseCase(repo)
+            val now = Clock.System.now()
 
             val note =
                 Note(
                     id = "n3",
                     title = "Summary",
+                    createdAt = now,
+                    updatedAt = now,
                     summary = "old summary",
                 )
             repo.createNote(note)
@@ -212,11 +224,14 @@ class AIUseCasesTest {
         runBlocking {
             val repo = FakeNotesRepo()
             val useCase = ApplyTagsUseCase(repo)
+            val now = Clock.System.now()
 
             val note =
                 Note(
                     id = "n4",
                     title = "Tags",
+                    createdAt = now,
+                    updatedAt = now,
                     tags = setOf("old"),
                 )
             repo.createNote(note)

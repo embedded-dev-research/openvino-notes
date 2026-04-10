@@ -1,17 +1,15 @@
 package com.itlab.domain.model
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 data class Note(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String? = null,
+    val createdAt: Instant? = null,
+    val updatedAt: Instant? = null,
     val title: String = "",
     val folderId: String? = null,
     val contentItems: List<ContentItem> = emptyList(),
-    val createdAt: Instant = Clock.System.now(),
-    val updatedAt: Instant = Clock.System.now(),
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
     val summary: String? = null,
