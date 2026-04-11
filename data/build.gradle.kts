@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.itlab.data"
-    compileSdkPreview = "CinnamonBun"
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 33
@@ -31,6 +31,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    compileSdkMinor = 0
 }
 
 kotlin {
