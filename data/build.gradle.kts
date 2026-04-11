@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.itlab.data"
-    compileSdk = 37
+    compileSdkPreview = "CinnamonBun"
 
     defaultConfig {
         minSdk = 33
