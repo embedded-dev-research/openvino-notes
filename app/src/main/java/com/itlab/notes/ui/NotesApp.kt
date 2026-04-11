@@ -1,11 +1,11 @@
 package com.itlab.notes.ui
 
 import androidx.compose.runtime.Composable
-import org.koin.androidx.compose.koinViewModel
+// import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun notesApp() {
-    val viewModel: NotesViewModel = koinViewModel()
+//    val viewModel: NotesViewModel = koinViewModel()
 //    val state = viewModel.uiState
 //
 //    when (val screen = state.screen) {
