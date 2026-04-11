@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.itlab.notes"
     compileSdk {
-        version = preview("CinnamonBun")
+        version = release(37)
     }
 
     defaultConfig {
