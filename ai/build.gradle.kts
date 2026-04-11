@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "com.itlab.ai"
     compileSdk {
-        version = release(37)
+        version = preview("CinnamonBun")
     }
 
     defaultConfig {
