@@ -1,5 +1,4 @@
 package com.itlab.domain.usecase.noteusecase
-
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.repository.NotesRepository
 import java.util.UUID
@@ -20,6 +19,7 @@ class DuplicateNoteUseCase(
                 title = if (note.title.isBlank()) "Copy" else "${note.title} Copy",
                 createdAt = now,
                 updatedAt = now,
+<<<<<<< HEAD
                 contentItems =
                     note.contentItems.map { item ->
                         when (item) {
@@ -30,6 +30,10 @@ class DuplicateNoteUseCase(
                         }
                     },
             )
+=======
+            )
+
+>>>>>>> 4974936 (Add some note usecases, covered with tests)
         return repo.createNote(duplicated)
     }
 }
