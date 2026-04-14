@@ -54,8 +54,8 @@ sealed interface NotesUiEvent {
     ) : NotesUiEvent
 
     data class RenameDirectory(
-        val directoryId : String,
-        val newName : String,
+        val directoryId: String,
+        val newName: String,
     ) : NotesUiEvent
 }
 
