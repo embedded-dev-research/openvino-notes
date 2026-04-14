@@ -54,7 +54,14 @@ class NotesViewModel(
                     }
                 }
             }
-
+            is NotesUiEvent.RenameDirectory -> {
+                val normalized = event.newName.trim()
+                if (normalized.isBlank() || event.directoryId == "all") return
+                viewModelScope.launch {
+                    val existingFolder = useCases.getFolderUseCase(event.directoryId) ?: return@launch
+                    useCases.updateFolderUseCase(existingFolder.copy(name = normalized))
+                }
+            }
             is NotesUiEvent.DeleteDirectory -> {
                 if (event.directoryId != "all") {
                     viewModelScope.launch {
@@ -73,7 +80,6 @@ class NotesViewModel(
                     }
                 }
             }
-
             NotesUiEvent.BackToDirectoryNotes -> backToDirectoryNotes()
             is NotesUiEvent.SaveNote -> saveNote(event.note)
             is NotesUiEvent.DeleteNote -> {
@@ -174,6 +180,8 @@ class NotesViewModel(
         notesJob?.cancel()
         super.onCleared()
     }
+
+
 }
 
 internal fun NoteFolder.toUi(noteCount: Int): DirectoryItemUi =

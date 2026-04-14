@@ -43,6 +43,7 @@ fun directoriesScreen(
     directories: List<DirectoryItemUi> = previewDirectoriesFallback(),
     onCreateDirectory: (String) -> Unit,
     onDeleteDirectory: (DirectoryItemUi) -> Unit,
+    onRenameDirectory: (DirectoryItemUi, String) -> Unit,
     onDirectoryClick: (DirectoryItemUi) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -59,6 +60,7 @@ fun directoriesScreen(
         directoriesList(
             directories = directories,
             onDirectoryLongClick = onDeleteDirectory,
+            onDirectoryRename = onRenameDirectory,
             onDirectoryClick = onDirectoryClick,
             modifier = Modifier.padding(paddingValues),
         )
@@ -126,10 +128,12 @@ private fun directoriesTopBar(onAddDirectoryClick: () -> Unit) {
 private fun directoriesList(
     directories: List<DirectoryItemUi>,
     onDirectoryLongClick: (DirectoryItemUi) -> Unit,
+    onDirectoryRename: (DirectoryItemUi, String) -> Unit,
     onDirectoryClick: (DirectoryItemUi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var directoryPendingDelete by remember { mutableStateOf<DirectoryItemUi?>(null) }
+    var directoryPendingRename by remember { mutableStateOf<DirectoryItemUi?>(null) }
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
         items(directories) { dir ->
             directoryRow(
@@ -146,8 +150,8 @@ private fun directoriesList(
     directoryPendingDelete?.let { dir ->
         AlertDialog(
             onDismissRequest = { directoryPendingDelete = null },
-            title = { Text("Delete directory?") },
-            text = { Text("Directory \"${dir.name}\" will be removed.") },
+            title = { Text("Directory actions") },
+            text = { Text("Choose action for \"${dir.name}\"") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -159,7 +163,43 @@ private fun directoriesList(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { directoryPendingDelete = null }) {
+                TextButton(
+                    onClick = {
+                        directoryPendingDelete = null
+                        directoryPendingRename = dir
+                    },
+                ) {
+                    Text("Rename")
+                }
+            },
+        )
+    }
+    directoryPendingRename?.let { dir ->
+        var renameName by remember(dir.id) { mutableStateOf(dir.name) }
+        AlertDialog(
+            onDismissRequest = { directoryPendingRename = null },
+            title = { Text("Rename directory") },
+            text = {
+                OutlinedTextField(
+                    value = renameName,
+                    onValueChange = { renameName = it },
+                    label = { Text("Directory name") },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDirectoryRename(dir, renameName)
+                        directoryPendingRename = null
+                    },
+                    enabled = renameName.trim().isNotEmpty(),
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { directoryPendingRename = null }) {
                     Text("Cancel")
                 }
             },
