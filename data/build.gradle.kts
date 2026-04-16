@@ -40,6 +40,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(platform(libs.firebase.bom))
     implementation(project(":domain"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -55,7 +56,6 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
-    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     testImplementation(libs.junit)
     testImplementation(libs.junit)
