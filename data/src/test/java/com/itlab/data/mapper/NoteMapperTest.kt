@@ -15,12 +15,14 @@ import org.junit.Test
 
 class NoteMapperTest {
     private val mapper = NoteMapper()
+    private val testUserId = "test-user-id"
     val testTime = Instant.parse("2026-03-24T12:00:00Z")
 
     @Test
     fun `toEntities should map all content types and media correctly`() {
         val note =
             Note(
+                userId = testUserId,
                 title = "Business",
                 tags = setOf("money", "market"),
                 contentItems =
@@ -45,6 +47,7 @@ class NoteMapperTest {
         val (entity, media) = mapper.toEntities(note)
 
         assertEquals(note.id, entity.id)
+        assertEquals(testUserId, entity.userId)
         assertEquals("Business", entity.title)
         assertTrue(entity.isFavorite)
         assertFalse(entity.isSynced)
@@ -83,6 +86,7 @@ class NoteMapperTest {
         val corruptedEntity =
             NoteEntity(
                 id = "test-id",
+                userId = testUserId,
                 title = "Broken Note",
                 content = "!!not a json!!",
                 tags = "{broken_tags}",
@@ -94,6 +98,7 @@ class NoteMapperTest {
 
         assertTrue(result.contentItems.isEmpty())
         assertTrue(result.tags.isEmpty())
+        assertEquals(testUserId, result.userId)
         assertEquals("Broken Note", result.title)
     }
 
@@ -122,6 +127,7 @@ class NoteMapperTest {
         val entity =
             NoteEntity(
                 id = "uuid-123",
+                userId = testUserId,
                 title = "Test Note",
                 folderId = "fuid-100",
                 content = json.encodeToString<List<ContentItem>>(originalItems),
@@ -134,6 +140,7 @@ class NoteMapperTest {
         val resultNote = mapper.toDomain(entity)
 
         assertEquals("uuid-123", resultNote.id)
+        assertEquals(testUserId, resultNote.userId)
         assertEquals("Test Note", resultNote.title)
         assertEquals("fuid-100", resultNote.folderId)
         assertTrue(resultNote.isFavorite)
@@ -147,6 +154,7 @@ class NoteMapperTest {
         val entityWithNullTags =
             NoteEntity(
                 id = "test-null-tags",
+                userId = testUserId,
                 title = "Note with NULL tags",
                 content = "[]",
                 tags = null,

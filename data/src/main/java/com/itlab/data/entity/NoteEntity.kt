@@ -8,6 +8,7 @@ import kotlinx.datetime.Instant
 data class NoteEntity(
     @PrimaryKey
     val id: String,
+    val userId: String,
     val title: String,
     val content: String,
     val folderId: String? = null,
