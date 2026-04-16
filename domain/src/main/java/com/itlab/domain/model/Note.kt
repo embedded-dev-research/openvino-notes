@@ -8,6 +8,7 @@ import java.util.Collections.emptySet
 import java.util.UUID
 
 data class Note(
+    val userId: String,
     val id: String = UUID.randomUUID().toString(),
     val title: String = "",
     val folderId: String? = null,

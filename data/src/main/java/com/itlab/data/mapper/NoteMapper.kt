@@ -28,6 +28,7 @@ class NoteMapper(
         val noteEntity =
             NoteEntity(
                 id = noteId,
+                userId = note.userId,
                 title = note.title,
                 folderId = note.folderId,
                 content = json.encodeToString(note.contentItems),
@@ -61,6 +62,7 @@ class NoteMapper(
 
         return Note(
             id = entity.id,
+            userId = entity.userId,
             title = entity.title,
             contentItems = items,
             folderId = entity.folderId,
