@@ -1,0 +1,30 @@
+package com.itlab.data.cloud
+
+import android.content.Context
+import android.content.Intent
+import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
+
+class AuthManager(
+    private val auth: FirebaseAuth
+){
+    fun getSignInIntent(): Intent {
+        return AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(
+                listOf(
+                    AuthUI.IdpConfig.EmailBuilder().build(),
+                    AuthUI.IdpConfig.GoogleBuilder().build()
+                )
+            )
+
+            .setIsSmartLockEnabled(false)
+            .build()
+    }
+
+    fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    fun signOut(context: Context){
+        AuthUI.getInstance().signOut(context)
+    }
+}
