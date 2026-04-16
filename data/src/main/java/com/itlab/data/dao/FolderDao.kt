@@ -8,7 +8,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.itlab.data.entity.FolderEntity
 import kotlinx.coroutines.flow.Flow
-
 @Dao
 interface FolderDao {
     @Query("SELECT * FROM folders ORDER BY name ASC")

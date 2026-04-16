@@ -3,6 +3,11 @@ package com.itlab.domain.cloud
 import kotlinx.datetime.Instant
 import java.io.File
 
+sealed interface Result<out T> {
+    data class Success<out T>(val data: T) : Result<T>
+    data class Error(val exception: Throwable) : Result<Nothing>
+}
+
 interface CloudDataSource {
     suspend fun listNoteMetadata(userId: String): Result<List<CloudNoteMetadata>>
 
