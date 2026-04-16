@@ -58,6 +58,10 @@ androidx-test-core = { group = "androidx.test", name = "core", version = "1.5.0"
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutinesTest" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version = "8.0.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
