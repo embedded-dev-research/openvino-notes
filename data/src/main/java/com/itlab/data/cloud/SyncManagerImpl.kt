@@ -6,18 +6,20 @@ import com.itlab.domain.cloud.CloudDataSource
 import com.itlab.domain.cloud.Result
 import com.itlab.domain.cloud.SyncManager
 import com.itlab.domain.cloud.SyncState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.SerializationException
 import timber.log.Timber
+import java.io.IOException
 
 class SyncManagerImpl(
     private val noteDao: NoteDao,
     private val cloudDataSource: CloudDataSource,
-    private val jsonConverter: NoteEntityJsonConverter
+    private val jsonConverter: NoteEntityJsonConverter,
 ) : SyncManager {
-
     private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
     override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
@@ -29,11 +31,28 @@ class SyncManagerImpl(
             pullUpdates(userId)
 
             _syncState.value = SyncState.Success
-        } catch (e: Exception) {
-            Timber.e(e, "Synchronization was interrupted due to an error")
-            _syncState.value = SyncState.Error(e.message ?: "Unknown error")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            handleError("Network error during sync", e)
+            throw e
+        } catch (e: SerializationException) {
+            handleError("Data parsing error", e)
+            throw e
+        } catch (e: IllegalStateException) {
+            handleError("Invalid state during sync", e)
             throw e
         }
+    }
+
+    private fun handleError(
+        message: String,
+        e: Exception,
+    ) {
+        Timber.e(e, message)
+        _syncState.value = SyncState.Error(e.message ?: "Unknown error")
     }
 
     override suspend fun pushChanges(userId: String) {
@@ -60,27 +79,30 @@ class SyncManagerImpl(
     override suspend fun pullUpdates(userId: String) {
         val metadataResult = cloudDataSource.listNoteMetadata(userId)
 
-        val remoteMetadata = when (metadataResult) {
-            is Result.Success -> metadataResult.data
-            is Result.Error -> throw metadataResult.exception
-        }
+        val remoteMetadata =
+            when (metadataResult) {
+                is Result.Success -> metadataResult.data
+                is Result.Error -> throw metadataResult.exception
+            }
 
         val localNotes = noteDao.getAllNotes().first()
         val localIds = localNotes.map { it.id }
 
-        val toDownload = remoteMetadata.filter { cloudMeta ->
-            cloudMeta.key !in localIds
-        }
+        val toDownload =
+            remoteMetadata.filter { cloudMeta ->
+                cloudMeta.key !in localIds
+            }
 
         for (meta in toDownload) {
             val downloadResult = cloudDataSource.downloadNote(meta.key)
 
             when (downloadResult) {
                 is Result.Success -> {
-                    val entity = jsonConverter.toEntity(
-                        jsonString = downloadResult.data,
-                        userId = userId
-                    )
+                    val entity =
+                        jsonConverter.toEntity(
+                            jsonString = downloadResult.data,
+                            userId = userId,
+                        )
                     noteDao.insert(entity)
                 }
                 is Result.Error -> {
