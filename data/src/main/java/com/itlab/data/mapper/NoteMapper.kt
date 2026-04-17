@@ -7,7 +7,7 @@ import com.itlab.data.mapper.toDto
 import com.itlab.data.model.ContentItemDto
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.Note
-import com.itlab.domain.model.SyncStatus
+import com.itlab.domain.model.SyncState
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -40,7 +40,7 @@ class NoteMapper(
                 updatedAt = note.updatedAt,
                 tags = json.encodeToString(note.tags),
                 isFavorite = note.isFavorite,
-                isSynced = note.syncStatus == SyncStatus.SYNCED,
+                isSynced = note.syncStatus == SyncState.SYNCED,
                 summary = note.summary,
             )
 
@@ -74,7 +74,7 @@ class NoteMapper(
             updatedAt = entity.updatedAt,
             tags = tags,
             isFavorite = entity.isFavorite,
-            syncStatus = if (entity.isSynced) SyncStatus.SYNCED else SyncStatus.PENDING,
+            syncStatus = if (entity.isSynced) SyncState.SYNCED else SyncState.PENDING,
             summary = entity.summary,
         )
     }
