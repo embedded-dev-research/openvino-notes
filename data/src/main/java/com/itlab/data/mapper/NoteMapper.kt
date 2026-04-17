@@ -2,8 +2,12 @@ package com.itlab.data.mapper
 
 import com.itlab.data.entity.MediaEntity
 import com.itlab.data.entity.NoteEntity
+import com.itlab.data.mapper.toDomain
+import com.itlab.data.mapper.toDto
+import com.itlab.data.model.ContentItemDto
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.Note
+import com.itlab.domain.model.SyncStatus
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -31,12 +35,12 @@ class NoteMapper(
                 userId = note.userId,
                 title = note.title,
                 folderId = note.folderId,
-                content = json.encodeToString(note.contentItems),
+                content = serializeContent(note.contentItems),
                 createdAt = note.createdAt,
                 updatedAt = note.updatedAt,
                 tags = json.encodeToString(note.tags),
                 isFavorite = note.isFavorite,
-                isSynced = false,
+                isSynced = note.syncStatus == SyncStatus.SYNCED,
                 summary = note.summary,
             )
 
@@ -46,7 +50,7 @@ class NoteMapper(
     fun toDomain(entity: NoteEntity): Note {
         val items =
             try {
-                json.decodeFromString<List<ContentItem>>(entity.content)
+                deserializeContent(entity.content)
             } catch (e: SerializationException) {
                 Timber.e(e, "Note content mapping failed for entity: ${entity.id}")
                 emptyList()
@@ -70,6 +74,8 @@ class NoteMapper(
             updatedAt = entity.updatedAt,
             tags = tags,
             isFavorite = entity.isFavorite,
+            syncStatus = if (entity.isSynced) SyncStatus.SYNCED else SyncStatus.PENDING,
+            summary = entity.summary,
         )
     }
 
@@ -93,5 +99,15 @@ class NoteMapper(
             mimeType = mimeType,
             size = (item as? ContentItem.File)?.size,
         )
+    }
+
+    fun serializeContent(items: List<ContentItem>): String {
+        val dtos = items.map { it.toDto() }
+        return json.encodeToString(dtos)
+    }
+
+    fun deserializeContent(jsonString: String): List<ContentItem> {
+        val dtos = json.decodeFromString<List<ContentItemDto>>(jsonString)
+        return dtos.map { it.toDomain() }
     }
 }
