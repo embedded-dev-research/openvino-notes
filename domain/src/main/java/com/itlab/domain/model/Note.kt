@@ -17,7 +17,7 @@ data class Note(
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
     val summary: String? = null,
-    val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val syncStatus: SyncState = SyncState.PENDING,
 )
 
 data class DataSource(
@@ -59,7 +59,7 @@ enum class TextFormat {
     HTML,
 }
 
-enum class SyncStatus {
+enum class SyncState {
     SYNCED,
     PENDING,
     SYNCING,
