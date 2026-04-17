@@ -58,7 +58,7 @@ class NoteMapperTest {
 
         assertEquals("[\"money\",\"market\"]", entity.tags)
 
-        val decodedItems = Json.decodeFromString<List<ContentItem>>(entity.content)
+        val decodedItems = mapper.deserializeContent((entity.content))
 
         assertEquals(note.contentItems, decodedItems)
 
@@ -130,7 +130,7 @@ class NoteMapperTest {
                 userId = testUserId,
                 title = "Test Note",
                 folderId = "fuid-100",
-                content = json.encodeToString<List<ContentItem>>(originalItems),
+                content = mapper.serializeContent(originalItems),
                 tags = json.encodeToString<Set<String>>(originalTags),
                 isFavorite = true,
                 createdAt = testTime,
