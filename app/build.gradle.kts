@@ -58,6 +58,11 @@ android {
             }
         }
     }
+
+    lint {
+        lintConfig = file("lint.xml")
+        abortOnError = true
+    }
 }
 
 kotlin {
