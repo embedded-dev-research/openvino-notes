@@ -46,4 +46,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(files("libs/java-api-1.0-SNAPSHOT.jar"))
+    implementation(files("libs/jna-5.13.0.jar"))
 }
