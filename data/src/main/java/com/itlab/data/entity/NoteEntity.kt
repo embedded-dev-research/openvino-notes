@@ -16,5 +16,6 @@ data class NoteEntity(
     val tags: String? = null,
     val isFavorite: Boolean = false,
     val isSynced: Boolean = false,
+    val isDeleted: Boolean = false,
     val summary: String? = null,
 )
