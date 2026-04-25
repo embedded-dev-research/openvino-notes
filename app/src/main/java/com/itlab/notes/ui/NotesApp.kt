@@ -2,9 +2,9 @@ package com.itlab.notes.ui
 
 import androidx.compose.runtime.Composable
 import com.itlab.notes.ui.editor.editorScreen
+import com.itlab.notes.ui.notes.NotesListActions
 import com.itlab.notes.ui.notes.directoriesScreen
 import com.itlab.notes.ui.notes.notesListScreen
-import com.itlab.notes.ui.notes.NotesListActions
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
