@@ -17,6 +17,12 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -41,6 +47,17 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes("*_Impl*", "*_Serializer*", "*_Companion*")
+                classes("*.databinding.*", "*.BuildConfig*")
+            }
+        }
     }
 }
 
@@ -72,4 +89,6 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.work.testing)
 }
