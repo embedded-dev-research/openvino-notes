@@ -79,7 +79,6 @@ class NoteUseCasesTest {
             val delete = DeleteNoteUseCase(repo)
             val get = GetNoteUseCase(repo)
 
-            val note = Note(title = "A")
             val note = Note(id = "n1", title = "A", userId = testUserId)
 
             val id = create(note)
@@ -112,7 +111,6 @@ class NoteUseCasesTest {
 
             val note = Note(id = "n1", title = "Note", userId = testUserId)
             createNote(note)
-            val note = Note(title = "Note")
 
             val noteId = createNote(note)
 
