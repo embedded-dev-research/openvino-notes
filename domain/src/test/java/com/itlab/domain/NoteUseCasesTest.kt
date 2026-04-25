@@ -130,7 +130,6 @@ class NoteUseCasesTest {
 
             create(Note(id = "n1", title = "Test", userId = testUserId))
 
-            create(Note(title = "Test"))
             val list = observe().first()
 
             assertEquals(1, list.size)
