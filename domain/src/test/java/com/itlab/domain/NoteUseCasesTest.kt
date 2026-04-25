@@ -3,6 +3,7 @@ package com.itlab.domain
 import com.itlab.domain.model.ContentItem
 import com.itlab.domain.model.Note
 import com.itlab.domain.model.NoteFolder
+import com.itlab.domain.model.ContentItem
 import com.itlab.domain.repository.NoteFolderRepository
 import com.itlab.domain.repository.NotesRepository
 import com.itlab.domain.usecase.noteusecase.AddTagUseCase
@@ -11,6 +12,7 @@ import com.itlab.domain.usecase.noteusecase.DeleteNoteUseCase
 import com.itlab.domain.usecase.noteusecase.DeleteTagUseCase
 import com.itlab.domain.usecase.noteusecase.DuplicateNoteUseCase
 import com.itlab.domain.usecase.noteusecase.GetAllFavoritesUseCase
+import com.itlab.domain.usecase.noteusecase.GetNotesByTagUseCase
 import com.itlab.domain.usecase.noteusecase.GetNoteUseCase
 import com.itlab.domain.usecase.noteusecase.GetNotesByTagUseCase
 import com.itlab.domain.usecase.noteusecase.MoveNoteToFolderUseCase
@@ -21,6 +23,7 @@ import com.itlab.domain.usecase.noteusecase.UpdateNoteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.fail
@@ -351,7 +354,6 @@ class NoteUseCasesTest {
             assertEquals(1, result.size)
             assertEquals("n10", result.first().id)
         }
-
     @Test
     fun searchNotes_findsByTitleAndTextContent() =
         runBlocking {
