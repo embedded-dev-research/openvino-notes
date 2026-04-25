@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
-@Config(manifest = Config.NONE)
+@Config(manifest = Config.NONE, sdk = [34])
 class MediaDaoTest {
     private lateinit var database: AppDatabase
     private lateinit var mediaDao: MediaDao
