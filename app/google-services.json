@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "267244224775",
+    "project_id": "openvino-notes",
+    "storage_bucket": "openvino-notes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:267244224775:android:fb17f8492f57205ffec5a2",
+        "android_client_info": {
+          "package_name": "com.itlab.notes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLAUPgzEm2R49WU4iGidAUj5b1jBb6FjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

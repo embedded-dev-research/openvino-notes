@@ -18,6 +18,8 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class NoteUseCasesTest {
+    private val testUserId = "test_user_1"
+
     private class FakeNotesRepo : NotesRepository {
         private val store = mutableMapOf<String, Note>()
         private val flow = MutableStateFlow<List<Note>>(emptyList())
@@ -77,7 +79,7 @@ class NoteUseCasesTest {
             val delete = DeleteNoteUseCase(repo)
             val get = GetNoteUseCase(repo)
 
-            val note = Note(title = "A")
+            val note = Note(id = "n1", title = "A", userId = testUserId)
 
             val id = create(note)
 
@@ -107,7 +109,8 @@ class NoteUseCasesTest {
             val folder = NoteFolder(id = "f1", name = "Folder")
             folderRepo.createFolder(folder)
 
-            val note = Note(title = "Note")
+            val note = Note(id = "n1", title = "Note", userId = testUserId)
+            createNote(note)
 
             val noteId = createNote(note)
 
@@ -125,7 +128,8 @@ class NoteUseCasesTest {
             val observe = ObserveNotesUseCase(repo)
             val create = CreateNoteUseCase(repo)
 
-            create(Note(title = "Test"))
+            create(Note(id = "n1", title = "Test", userId = testUserId))
+
             val list = observe().first()
 
             assertEquals(1, list.size)
