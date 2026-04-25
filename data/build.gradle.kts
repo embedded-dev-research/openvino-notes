@@ -42,6 +42,7 @@ android {
         lintConfig = file("lint.xml")
         abortOnError = true
     }
+    compileSdkMinor = 0
 }
 
 kotlin {
