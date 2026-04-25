@@ -224,7 +224,7 @@ internal fun NoteItemUi.toDomain(folderId: String?): Note =
         contentItems = listOf(ContentItem.Text(content)),
     )
 
-private fun Note.applyUiUpdate(
+internal fun Note.applyUiUpdate(
     ui: NoteItemUi,
     targetFolderId: String?,
 ): Note {
