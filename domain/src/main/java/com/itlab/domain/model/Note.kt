@@ -27,14 +27,18 @@ data class DataSource(
 
 @Serializable
 sealed class ContentItem {
+    abstract val id: String
+
     @Serializable
     data class Text(
+        override val id: String = UUID.randomUUID().toString(),
         val text: String,
         val format: TextFormat = TextFormat.PLAIN,
     ) : ContentItem()
 
     @Serializable
     data class Image(
+        override val id: String = UUID.randomUUID().toString(),
         val source: DataSource,
         val mimeType: String,
         val width: Int? = null,
@@ -43,6 +47,7 @@ sealed class ContentItem {
 
     @Serializable
     data class File(
+        override val id: String = UUID.randomUUID().toString(),
         val source: DataSource,
         val mimeType: String,
         val name: String,
@@ -51,6 +56,7 @@ sealed class ContentItem {
 
     @Serializable
     data class Link(
+        override val id: String = UUID.randomUUID().toString(),
         val url: String,
         val title: String? = null,
     ) : ContentItem()

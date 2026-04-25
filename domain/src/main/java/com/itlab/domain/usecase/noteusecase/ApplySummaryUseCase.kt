@@ -1,6 +1,7 @@
-package com.itlab.domain.aiusecase
+package com.itlab.domain.usecase.noteusecase
 
 import com.itlab.domain.repository.NotesRepository
+import kotlinx.datetime.Clock
 
 class ApplySummaryUseCase(
     private val repo: NotesRepository,
@@ -17,7 +18,7 @@ class ApplySummaryUseCase(
             note.copy(
                 summary = newSummary,
                 updatedAt =
-                    kotlinx.datetime.Clock.System
+                    Clock.System
                         .now(),
             )
 
