@@ -66,6 +66,16 @@ kover {
 }
 
 subprojects {
+    tasks.register("forceWriteLocks") {
+        doLast {
+            configurations.filter { it.isCanBeResolved }.forEach { 
+                try { it.resolve() } catch (e: Exception) { } 
+            }
+        }
+    }
+}
+
+subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "org.jetbrains.kotlinx.kover")
