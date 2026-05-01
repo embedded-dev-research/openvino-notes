@@ -68,8 +68,11 @@ kover {
 subprojects {
     tasks.register("forceWriteLocks") {
         doLast {
-            configurations.filter { it.isCanBeResolved }.forEach { 
-                try { it.resolve() } catch (e: Exception) { } 
+            configurations.filter { it.isCanBeResolved }.forEach {
+                try {
+                    it.resolve()
+                } catch (e: Exception) {
+                }
             }
         }
     }
