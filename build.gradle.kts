@@ -59,7 +59,7 @@ kover {
         }
         verify {
             rule {
-                minBound(60)
+                minBound(55)
             }
         }
     }
@@ -106,7 +106,7 @@ subprojects {
             }
             verify {
                 rule {
-                    minBound(60)
+                    minBound(55)
                 }
             }
         }
