@@ -59,6 +59,18 @@ android {
     }
 }
 
+tasks.register("resolveAllDependencies") {
+    doLast {
+        configurations.filter { it.isCanBeResolved }.forEach { configuration ->
+            try {
+                configuration.resolve()
+            } catch (e: Exception) {
+                println("Skipping configuration ${configuration.name}: ${e.message}")
+            }
+        }
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)

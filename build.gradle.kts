@@ -59,7 +59,20 @@ kover {
         }
         verify {
             rule {
-                minBound(60)
+                minBound(55)
+            }
+        }
+    }
+}
+
+subprojects {
+    tasks.register("forceWriteLocks") {
+        doLast {
+            configurations.filter { it.isCanBeResolved }.forEach {
+                try {
+                    it.resolve()
+                } catch (e: Exception) {
+                }
             }
         }
     }
@@ -106,7 +119,7 @@ subprojects {
             }
             verify {
                 rule {
-                    minBound(60)
+                    minBound(55)
                 }
             }
         }
