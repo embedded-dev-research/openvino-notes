@@ -111,7 +111,6 @@ class NotesViewModel(
     }
 
     private fun backToDirectories() {
-        notesJob?.cancel()
         uiState =
             uiState.copy(
                 screen = NotesUiScreen.Directories,
@@ -133,12 +132,7 @@ class NotesViewModel(
         val dir = (uiState.screen as? NotesUiScreen.DirectoryNotes)?.directory
         if (dir != null) {
             val newNote =
-                NoteItemUi(
-                    id = UUID.randomUUID().toString(),
-                    title = "",
-                    content = "",
-                    folderId = dir.id.asDomainFolderId(),
-                )
+                Note(folderId = dir.id.asDomainFolderId()).toUi()
             uiState =
                 uiState.copy(
                     screen = NotesUiScreen.NoteEditor(directory = dir, note = newNote),
