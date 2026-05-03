@@ -2,10 +2,12 @@ package com.itlab.domain.model
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
+import java.util.Collections.emptyList
+import java.util.Collections.emptySet
 import java.util.UUID
 
 data class Note(
+    val userId: String,
     val id: String = UUID.randomUUID().toString(),
     val title: String = "",
     val folderId: String? = null,
@@ -15,9 +17,9 @@ data class Note(
     val tags: Set<String> = emptySet(),
     val isFavorite: Boolean = false,
     val summary: String? = null,
+    val syncStatus: SyncState = SyncState.PENDING,
 )
 
-@Serializable
 data class DataSource(
     val localPath: String? = null,
     val remoteUrl: String? = null,
@@ -25,15 +27,12 @@ data class DataSource(
     val displayPath: String? get() = localPath ?: remoteUrl
 }
 
-@Serializable
 sealed class ContentItem {
-    @Serializable
     data class Text(
         val text: String,
         val format: TextFormat = TextFormat.PLAIN,
     ) : ContentItem()
 
-    @Serializable
     data class Image(
         val source: DataSource,
         val mimeType: String,
@@ -41,7 +40,6 @@ sealed class ContentItem {
         val height: Int? = null,
     ) : ContentItem()
 
-    @Serializable
     data class File(
         val source: DataSource,
         val mimeType: String,
@@ -49,16 +47,21 @@ sealed class ContentItem {
         val size: Long? = null,
     ) : ContentItem()
 
-    @Serializable
     data class Link(
         val url: String,
         val title: String? = null,
     ) : ContentItem()
 }
 
-@Serializable
 enum class TextFormat {
     PLAIN,
     MARKDOWN,
     HTML,
+}
+
+enum class SyncState {
+    SYNCED,
+    PENDING,
+    SYNCING,
+    ERROR,
 }

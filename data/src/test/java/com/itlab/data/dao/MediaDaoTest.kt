@@ -18,12 +18,12 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
-@Config(manifest = Config.NONE)
+@Config(manifest = Config.NONE, sdk = [34])
 class MediaDaoTest {
     private lateinit var database: AppDatabase
     private lateinit var mediaDao: MediaDao
     private lateinit var noteDao: NoteDao
-
+    private val testUserId = "test_user_1"
     val testTime = Instant.parse("2026-03-24T12:00:00Z")
 
     private suspend fun insertParentNote(id: String) {
@@ -35,6 +35,7 @@ class MediaDaoTest {
                 createdAt = testTime,
                 updatedAt = kotlinx.datetime.Instant.fromEpochMilliseconds(0),
                 isSynced = true,
+                userId = testUserId,
             )
         noteDao.insert(note)
     }
