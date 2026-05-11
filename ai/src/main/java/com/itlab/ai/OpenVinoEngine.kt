@@ -1,4 +1,5 @@
 package com.itlab.ai
+
 class OpenVinoEngine {
     fun runLlmSummary(text: String): String = text
 
