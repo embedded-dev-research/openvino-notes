@@ -27,3 +27,4 @@ class SearchNotesUseCase(
 
         return titleMatch || contentMatch
     }
+}
