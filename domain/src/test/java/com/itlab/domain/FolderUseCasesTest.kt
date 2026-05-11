@@ -123,4 +123,12 @@ class FolderUseCasesTest {
 
             assertEquals(1, list.size)
         }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun createFolder_blankName_throws(): Unit =
+        runBlocking {
+            val repo = FakeFolderRepo()
+            val create = CreateFolderUseCase(repo)
+            create(NoteFolder(name = "   "))
+        }
 }

@@ -377,4 +377,17 @@ class NoteUseCasesTest {
             assertEquals(1, result.size)
             assertEquals("n9", result.first().id)
         }
+
+    @Test
+    fun addTag_trimsIncomingTag() =
+        runBlocking {
+            val repo = FakeNotesRepo()
+            val useCase = AddTagUseCase(repo)
+            repo.createNote(Note(id = "n1", title = "Test", tags = emptySet()))
+
+            useCase("n1", "  kotlin  ")
+
+            val updated = repo.getNoteById("n1")
+            assertEquals(setOf("kotlin"), updated?.tags)
+        }
 }

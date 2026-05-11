@@ -1,6 +1,7 @@
 package com.itlab.domain.usecase.noteusecase
 
 import com.itlab.domain.repository.NotesRepository
+import com.itlab.domain.usecase.requireNotBlank
 import kotlin.time.Clock
 
 class MoveNoteToFolderUseCase(
@@ -10,6 +11,8 @@ class MoveNoteToFolderUseCase(
         folderId: String,
         noteId: String,
     ) {
+        requireNotBlank(noteId, "Note id")
+        requireNotBlank(folderId, "Folder id")
         val note = notesRepo.getNoteById(noteId) ?: throw IllegalArgumentException("Note not found: $noteId")
         val updated = note.copy(folderId = folderId, updatedAt = Clock.System.now())
         notesRepo.updateNote(updated)
