@@ -35,6 +35,31 @@ class OpenVinoEngine(
         private const val CONF_THRESHOLD = 0.35f
         private const val IOU_THRESHOLD = 0.45f
         private const val MAX_DETECTIONS = 300
+
+        fun getOptimalModelPath(context: Context): String {
+            // val forcedModel = System.getProperty("YOLO_MODEL_NUMBER")
+            val forcedModel = "10"
+            return when (forcedModel) {
+                "26" -> "models/yolo26n_openvino_model/yolo26n.xml"
+                "10" -> "models/yolov10n_openvino_model/yolov10n.xml"
+                else -> {
+                    val coreCount = Runtime.getRuntime().availableProcessors()
+                    val totalRam = getTotalRamMB(context)
+                    if (coreCount >= 4 && totalRam >= 2048) {
+                        "models/yolo26n_openvino_model/yolo26n.xml"
+                    } else {
+                        "models/yolov10n_openvino_model/yolov10n.xml"
+                    }
+                }
+            }
+        }
+
+        private fun getTotalRamMB(context1: Context): Long {
+            val activityManager = context1.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val memInfo = ActivityManager.MemoryInfo()
+            activityManager.getMemoryInfo(memInfo)
+            return memInfo.totalMem / (1024 * 1024)
+        }
     }
 
     private var core: Core? = null
@@ -121,25 +146,6 @@ class OpenVinoEngine(
             Log.e(TAG, "YOLO detection failed", e)
             emptyList()
         }
-    }
-
-    @Suppress("UnusedPrivateMember")
-    private fun getOptimalModelPath(): String {
-        val coreCount = Runtime.getRuntime().availableProcessors()
-        val totalRam = getTotalRamMB()
-
-        return if (coreCount >= 4 && totalRam >= 2048) {
-            "models/yolo26n_openvino_model/yolo26n.xml"
-        } else {
-            "models/yolov10n_openvino_model/yolov10n.xml"
-        }
-    }
-
-    private fun getTotalRamMB(): Long {
-        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        val memInfo = ActivityManager.MemoryInfo()
-        activityManager.getMemoryInfo(memInfo)
-        return memInfo.totalMem / (1024 * 1024)
     }
 
     private fun loadClassNames(): List<String> =
@@ -349,17 +355,34 @@ class OpenVinoEngine(
     }
 
     private fun resolveModelXmlPath(): String? {
+        // Если путь задан явно и существует — сразу возвращаем
+        if (modelXmlPath.isNotBlank()) {
+            return if (File(modelXmlPath).exists()) {
+                modelXmlPath
+            } else {
+                // Пробуем скопировать из assets
+                val relativePath = modelXmlPath.substringAfter("files/")
+                val targetFile = File(context.filesDir, relativePath)
+                val assetDir = relativePath.substringBeforeLast("/")
+
+                if (copyAssetDirectory(assetDir, targetFile.parentFile ?: context.filesDir)) {
+                    targetFile.absolutePath
+                } else {
+                    Log.e(TAG, "Custom model not found and cannot be copied: $modelXmlPath")
+                    null
+                }
+            }
+        }
+
+        // Дефолт — yolo26n
         val modelDir = File(context.filesDir, DEFAULT_MODEL_ASSET_DIR)
         val modelXml = File(modelDir, DEFAULT_MODEL_XML)
 
-        return when {
-            modelXmlPath.isNotBlank() -> modelXmlPath
-            modelXml.exists() -> modelXml.absolutePath
-            copyAssetDirectory(DEFAULT_MODEL_ASSET_DIR, modelDir) -> modelXml.absolutePath
-            else -> {
-                Log.e(TAG, "Bundled model assets are missing: $DEFAULT_MODEL_ASSET_DIR")
-                null
-            }
+        return if (modelXml.exists() || copyAssetDirectory(DEFAULT_MODEL_ASSET_DIR, modelDir)) {
+            modelXml.absolutePath
+        } else {
+            Log.e(TAG, "Bundled model assets are missing: $DEFAULT_MODEL_ASSET_DIR")
+            null
         }
     }
 

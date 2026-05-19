@@ -7,11 +7,15 @@ import com.itlab.domain.ai.NoteAiService
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import java.io.File
 
 val aiModule =
     module {
         single {
-            OpenVinoEngine(androidContext()).also { engine ->
+            val context = androidContext()
+            val optimalRelativePath = OpenVinoEngine.getOptimalModelPath(context)
+            val optimalAbsolutePath = File(context.filesDir, optimalRelativePath).absolutePath
+            OpenVinoEngine(context, optimalAbsolutePath).also { engine ->
                 runBlocking { engine.initialize() }
             }
         }

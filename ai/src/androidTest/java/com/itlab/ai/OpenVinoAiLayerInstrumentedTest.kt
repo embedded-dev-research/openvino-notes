@@ -87,4 +87,56 @@ class OpenVinoAiLayerInstrumentedTest {
             assertTrue(initialized)
             assertTrue(engine.isReady())
         }
+
+    private fun copyTestImage(context: android.content.Context): String {
+        val testImageFile = File(context.filesDir, "bus.jpg")
+        if (!testImageFile.exists()) {
+            context.assets.open("bus.jpg").use { input ->
+                testImageFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        return testImageFile.absolutePath
+    }
+
+    @Test
+    fun yolo26n_detectsBus_onTestImage() =
+        runBlocking {
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            val modelPath = File(context.filesDir, "models/yolo26n_openvino_model/yolo26n.xml").absolutePath
+            val engine = createEngine(modelPath)
+
+            withContext(Dispatchers.Default) {
+                engine.initialize()
+            }
+            assertTrue("Engine should be ready", engine.isReady())
+
+            val imagePath = copyTestImage(context)
+            val result = engine.runYoloTagging(imagePath)
+
+            assertTrue("Should detect objects", result.isNotEmpty())
+            assertTrue("Should detect bus", result.contains("bus"))
+        }
+
+    @Test
+    fun yoloV10n_detectsBus_onTestImage() =
+        runBlocking {
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            val modelPath = File(context.filesDir, "models/yolov10n_openvino_model/yolov10n.xml").absolutePath
+            val engine = createEngine(modelPath)
+
+            val initialized =
+                withContext(Dispatchers.Default) {
+                    engine.initialize()
+                }
+            assertTrue("Engine should initialize with yoloV10", initialized)
+            assertTrue("Engine should be ready", engine.isReady())
+
+            val imagePath = copyTestImage(context)
+            val result = engine.runYoloTagging(imagePath)
+
+            assertTrue("Should detect objects", result.isNotEmpty())
+            assertTrue("Should detect bus", result.contains("bus"))
+        }
 }

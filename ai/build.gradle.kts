@@ -58,6 +58,34 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    val downloadTestImage by tasks.register<Exec>("downloadTestImage") {
+        val outputDir = layout.projectDirectory.dir("src/androidTest/assets")
+        val imageUrl = "https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg"
+        val outputFile = outputDir.file("bus.jpg")
+
+        commandLine(
+            if (System.getProperty("os.name").lowercase().contains("windows")) {
+                listOf(
+                    "powershell",
+                    "-Command",
+                    "Invoke-WebRequest",
+                    "-Uri",
+                    imageUrl,
+                    "-OutFile",
+                    outputFile.asFile.absolutePath,
+                )
+            } else {
+                listOf("curl", "-L", "-o", outputFile.asFile.absolutePath, imageUrl)
+            },
+        )
+
+        outputs.file(outputFile)
+    }
+
+// Добавь зависимость, чтобы таск выполнялся перед тестами
+    tasks.matching { it.name == "preBuild" }.configureEach {
+        dependsOn(downloadTestImage)
+    }
 }
 
 val prepareYolo26Model =
