@@ -37,8 +37,7 @@ class OpenVinoEngine(
         private const val MAX_DETECTIONS = 300
 
         fun getOptimalModelPath(context: Context): String {
-            // val forcedModel = System.getProperty("YOLO_MODEL_NUMBER")
-            val forcedModel = "10"
+            val forcedModel = System.getProperty("YOLO_MODEL_NUMBER")
             return when (forcedModel) {
                 "26" -> "models/yolo26n_openvino_model/yolo26n.xml"
                 "10" -> "models/yolov10n_openvino_model/yolov10n.xml"
