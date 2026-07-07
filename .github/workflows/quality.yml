@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Set up toolchain
         uses: ./.github/actions/setup-android-gradle
@@ -40,35 +40,35 @@ jobs:
 
       - name: Upload detekt SARIF for ai
         if: always() && hashFiles('ai/build/reports/detekt/detekt.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4.35.3
+        uses: github/codeql-action/upload-sarif@v4.36.3
         with:
           sarif_file: ai/build/reports/detekt/detekt.sarif
           category: detekt-ai
 
       - name: Upload detekt SARIF for app
         if: always() && hashFiles('app/build/reports/detekt/detekt.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4.35.3
+        uses: github/codeql-action/upload-sarif@v4.36.3
         with:
           sarif_file: app/build/reports/detekt/detekt.sarif
           category: detekt-app
 
       - name: Upload detekt SARIF for data
         if: always() && hashFiles('data/build/reports/detekt/detekt.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4.35.3
+        uses: github/codeql-action/upload-sarif@v4.36.3
         with:
           sarif_file: data/build/reports/detekt/detekt.sarif
           category: detekt-data
 
       - name: Upload detekt SARIF for domain
         if: always() && hashFiles('domain/build/reports/detekt/detekt.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4.35.3
+        uses: github/codeql-action/upload-sarif@v4.36.3
         with:
           sarif_file: domain/build/reports/detekt/detekt.sarif
           category: detekt-domain
 
       - name: Upload foundation artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: quality-foundation-reports
           if-no-files-found: ignore
@@ -87,7 +87,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Set up toolchain
         uses: ./.github/actions/setup-android-gradle
@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload quality artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: quality-build-reports-x86_64
           if-no-files-found: ignore
@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload debug APK artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apks-x86_64
           if-no-files-found: error
@@ -132,7 +132,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Set up toolchain
         uses: ./.github/actions/setup-android-gradle
@@ -149,7 +149,7 @@ jobs:
 
       - name: Upload quality artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: quality-build-reports-arm64
           if-no-files-found: ignore
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload debug APK artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apks-arm64
           if-no-files-found: error
@@ -177,10 +177,10 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Set up Java
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v5.4.0
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -192,7 +192,7 @@ jobs:
           packages: platform-tools
 
       - name: Restore Android SDK package cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ${{ env.ANDROID_HOME }}/platforms/android-${{ env.ANDROID_API_LEVEL }}
@@ -203,7 +203,7 @@ jobs:
             android-sdk-packages-${{ runner.os }}-
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6.1.0
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Install Android SDK packages
         shell: pwsh
@@ -228,7 +228,7 @@ jobs:
 
       - name: Upload quality artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: quality-build-reports-windows-x86_64
           if-no-files-found: ignore
@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload debug APK artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apks-windows-x86_64
           if-no-files-found: error
@@ -258,7 +258,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Set up toolchain
         uses: ./.github/actions/setup-android-gradle
@@ -273,7 +273,7 @@ jobs:
 
       - name: Upload coverage artifacts
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: quality-coverage-reports
           if-no-files-found: ignore
